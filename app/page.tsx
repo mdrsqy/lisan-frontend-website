@@ -1,136 +1,97 @@
-// frontend/app/page.tsx
-import { LayoutDashboard, Users, BookOpen, BarChart3 } from "lucide-react";
-import { KpiCard } from "@/components/dashboard/kpi-card";
-import { ActivityFeed } from "@/components/dashboard/activity-feed";
-import { TopLessonsChart } from "@/components/dashboard/top-lessons-chart";
-import { UserGrowthChart } from "@/components/dashboard/user-growth-chart";
-import { LevelDistributionChart } from "@/components/dashboard/level-distribution-chart";
+"use client";
 
-// Kita perlu type untuk data Dashboard
-interface DashboardData {
-  kpis: {
-    totalUsers: number;
-    monthlyActiveUsers: number;
-    totalLessons: number;
-    avgCompletionRate: number; // 68
-    userGrowthTrend: number; // 23
-  };
-  recentActivity: {
-    name: string;
-    action: string;
-    lesson: string;
-    time: string;
-  }[];
-  topLessons: {
-    title: string;
-    views: number;
-  }[];
-}
-
-async function getDashboardData(): Promise<DashboardData | null> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/dashboard`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    console.error("Failed to fetch dashboard data");
-    return null;
-  }
-  return res.json();
-}
-
-export default async function DashboardPage() {
-  const data = await getDashboardData();
-
-  if (!data)
-    return (
-      <div className="text-red-400">
-        Failed to load dashboard data. Check API logs.
-      </div>
-    );
-
-  // --- PASTIKAN NAMA VARIABEL INI SAMA DENGAN PROPS DI BAWAH ---
-  const userGrowthData = [
-    { month: "Jun", total: 1500, mau: 800 },
-    { month: "Jul", total: 1650, mau: 950 },
-    { month: "Aug", total: 1800, mau: 1050 },
-    { month: "Sep", total: 2000, mau: 1200 },
-    { month: "Oct", total: 2400, mau: 1500 },
-    {
-      month: "Nov",
-      total: data.kpis.totalUsers,
-      mau: data.kpis.monthlyActiveUsers,
-    },
-  ];
-
-  const levelDistributionData = [
-    { name: "Beginner", value: 40, color: "var(--color-chart-1)" },
-    { name: "Intermediate", value: 35, color: "var(--color-chart-2)" },
-    { name: "Advanced", value: 25, color: "var(--color-chart-3)" },
-  ];
-  // --- AKHIR DEFINISI VARIABEL ---
-
+export default function LandingPage() {
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-
-      {/* KPI Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <KpiCard
-          title="Total Users"
-          value={data.kpis.totalUsers.toLocaleString()}
-          icon={Users}
-          change={`+${data.kpis.userGrowthTrend}% from last month`}
-          changeType="up"
-        />
-        <KpiCard
-          title="Monthly Active Users"
-          value={data.kpis.monthlyActiveUsers.toLocaleString()}
-          icon={LayoutDashboard}
-          change={`+${data.kpis.userGrowthTrend + 5}% from last month`}
-          changeType="up"
-        />
-        <KpiCard
-          title="Avg. Completion Rate"
-          value={`${data.kpis.avgCompletionRate}%`}
-          icon={BarChart3}
-          change="-5% from last month"
-          changeType="down"
-        />
-        <KpiCard
-          title="Total Lessons"
-          value={data.kpis.totalLessons.toLocaleString()}
-          icon={BookOpen}
-          change={`+8 new this month`}
-          changeType="up"
-        />
-      </div>
-
-      {/* Main Charts & Activity Feed */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* User Growth & MAU Trend */}
-        <div className="lg:col-span-2">
-          {/* PASTIKAN NAMA PROPS SAMA DENGAN VARIABEL DI ATAS */}
-          <UserGrowthChart data={userGrowthData} />
+    <div className="flex flex-col min-h-screen bg-[#070014] overflow-hidden overscroll-none text-gray-300">
+      {/* Header */}
+      <header className="flex items-center justify-between px-45 py-5 border-b border-gray-800">
+        {/* Logo */}
+        <div className="flex items-center space-x-7">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+            H
+          </div>
+          <span className="text-lg font-semibold text-gray-50 hover:text-white transition-colors cursor-default">
+            Lisan
+          </span>
         </div>
 
-        {/* Recent Activity */}
-        <ActivityFeed activities={data.recentActivity} />
-      </div>
-
-      {/* Bottom Charts */}
-      <div className="grid gap-6 lg:grid-cols-5">
-        {/* User Distribution by Level */}
-        <div className="lg:col-span-2">
-          {/* PASTIKAN NAMA PROPS SAMA DENGAN VARIABEL DI ATAS */}
-          <LevelDistributionChart data={levelDistributionData} />
+        {/* Right side buttons */}
+        <div className="flex items-center space-x-15">
+          <button className="text-gray-400 hover:text-white transition-colors">
+            Masuk
+          </button>
+          <button className="px-6 py-2 rounded-2xl border border-gray-600 text-gray-300 hover:text-white hover:border-white transition-colors">
+            Daftar
+          </button>
         </div>
+      </header>
 
-        {/* Top 5 Lessons */}
-        <div className="lg:col-span-3">
-          <TopLessonsChart data={data.topLessons} />
+      {/* Isi halaman */}
+      <main className="flex-grow flex items-center justify-center text-gray-400">
+        <h1 className="text-3xl font-light">Selamat datang di Landing Page 🌙</h1>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-800 px-45 py-10 text-sm">
+        <div className="flex flex-wrap justify-between gap-8">
+          {/* Kiri */}
+          <div className="flex flex-col space-y-4">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+              H
+            </div>
+            <p className="text-gray-500">© Lisan.com – All rights reserved.</p>
+            <div className="flex space-x-4 mt-2 text-purple-400">
+              <span className="cursor-pointer hover:text-white">𝕏</span>
+              <span className="cursor-pointer hover:text-white">DEV</span>
+              <span className="cursor-pointer hover:text-white">GH</span>
+            </div>
+          </div>
+
+          {/* Kanan */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-25">
+            <div>
+              <h3 className="font-semibold text-gray-100 mb-3">Products</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li className="hover:text-white cursor-pointer">Features</li>
+                <li className="hover:text-white cursor-pointer">Integrations</li>
+                <li className="hover:text-white cursor-pointer">Pricing & Plans</li>
+                <li className="hover:text-white cursor-pointer">Changelog</li>
+                <li className="hover:text-white cursor-pointer">Our method</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-gray-100 mb-3">Company</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li className="hover:text-white cursor-pointer">About us</li>
+                <li className="hover:text-white cursor-pointer">Diversity & Inclusion</li>
+                <li className="hover:text-white cursor-pointer">Blog</li>
+                <li className="hover:text-white cursor-pointer">Careers</li>
+                <li className="hover:text-white cursor-pointer">Financial statements</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-gray-100 mb-3">Resources</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li className="hover:text-white cursor-pointer">Community</li>
+                <li className="hover:text-white cursor-pointer">Terms of service</li>
+                <li className="hover:text-white cursor-pointer">Report a vulnerability</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-gray-100 mb-3">Legals</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li className="hover:text-white cursor-pointer">Refund policy</li>
+                <li className="hover:text-white cursor-pointer">Terms & Conditions</li>
+                <li className="hover:text-white cursor-pointer">Privacy policy</li>
+                <li className="hover:text-white cursor-pointer">Brand Kit</li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
