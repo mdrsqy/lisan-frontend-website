@@ -4,7 +4,7 @@ import api from "../lib/api";
 interface User {
   id?: string;
   user_id?: number;
-  name: string;
+  full_name: string;
   email: string;
   username: string;
   role: string;
@@ -18,7 +18,7 @@ interface AuthState {
   loading: boolean;
   signin: (emailOrUsername: string, password: string) => Promise<void>;
   signup: (data: {
-    name: string;
+    full_name: string;
     username: string;
     email: string;
     password: string;

@@ -165,29 +165,29 @@ html, body {
   0%, 15% {
     --a: 135deg;
     --p: 20%;
-    --c1: #6D28D9; /* Deep Purple */
-    --c2: #ff76ca; /* Bright Pink */
+    --c1: #ffffff; /* Deep Purple */
+    --c2: #fd9cd8; /* Bright Pink */
     background-position: 0 0, var(--s) var(--s);
   }
   45%, 50% {
     --a: 90deg;
     --p: 25%;
-    --c1: #6000fb;
-    --c2: #ff65c4;
+    --c1: #ffffff;
+    --c2: #fd9cd8;
     background-position: 0 0, var(--s) var(--s);
   }
   50.01%, 55% {
     --a: 90deg;
     --p: 25%;
-    --c2: #6D28D9;
-    --c1: #ff65c4;
+    --c2: #ffffff;
+    --c1: #fd9cd8;
     background-position: var(--s) 0, 0 var(--s);
   }
   85%, 100% {
     --a: 135deg;
     --p: 20%;
-    --c2: #6D28D9;
-    --c1: #ff65c4;
+    --c2: #ffffff;
+    --c1: #fd9cd8;
     background-position: var(--s) 0, 0 var(--s);
   }
 }
