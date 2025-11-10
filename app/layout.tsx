@@ -32,20 +32,20 @@ export default function RootLayout({
           toastOptions={{
             duration: 4000,
             style: {
-              background: "rgba(25, 0, 40, 0.6)",
+              background: "rgba(1, 29, 68, 0.6)",
               color: "#fff",
               backdropFilter: "blur(10px)",
               border: "1px solid rgba(255, 255, 255, 0.1)",
             },
             success: {
               iconTheme: {
-                primary: "#a855f7", // purple-500
+                primary: "#1c9cf0", // purple-500
                 secondary: "#fff",
               },
             },
             error: {
               iconTheme: {
-                primary: "#fb7185", // pink-400
+                primary: "#0004ffff", // pink-400
                 secondary: "#fff",
               },
             },

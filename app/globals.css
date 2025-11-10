@@ -139,7 +139,7 @@ html, body {
   height: 100%;
 }
 
-/* === Animated Deep Purple - Bright Pink Background === */
+/* === Animated Primary Gradient Background (Blue - White) === */
 @property --a {
   syntax: '<angle>';
   inherits: true;
@@ -165,29 +165,29 @@ html, body {
   0%, 15% {
     --a: 135deg;
     --p: 20%;
-    --c1: #ffffff; /* Deep Purple */
-    --c2: #fd9cd8; /* Bright Pink */
+    --c1: #1c9cf0; /* Primary Blue */
+    --c2: #ffffff; /* Primary Foreground */
     background-position: 0 0, var(--s) var(--s);
   }
   45%, 50% {
     --a: 90deg;
     --p: 25%;
-    --c1: #ffffff;
-    --c2: #fd9cd8;
+    --c1: #1c9cf0;
+    --c2: #ffffff;
     background-position: 0 0, var(--s) var(--s);
   }
   50.01%, 55% {
     --a: 90deg;
     --p: 25%;
-    --c2: #ffffff;
-    --c1: #fd9cd8;
+    --c2: #1c9cf0;
+    --c1: #ffffff;
     background-position: var(--s) 0, 0 var(--s);
   }
   85%, 100% {
     --a: 135deg;
     --p: 20%;
-    --c2: #ffffff;
-    --c1: #fd9cd8;
+    --c2: #1c9cf0;
+    --c1: #ffffff;
     background-position: var(--s) 0, 0 var(--s);
   }
 }
