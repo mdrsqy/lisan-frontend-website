@@ -1,63 +1,87 @@
-'use client';
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Twitter, Instagram, Facebook, Globe, Brain, Heart, Gamepad2, Accessibility } from "lucide-react";
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { Twitter, Instagram, Facebook, Globe, Brain, Heart, Gamepad2, Accessibility } from 'lucide-react'
 
 export default function LandingPage() {
-  const router = useRouter();
-
-  const [text, setText] = useState("");
-  const fullText = "Selamat Datang di Lisan";
-  const [index, setIndex] = useState(0);
-  const [deleting, setDeleting] = useState(false);
-
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const ua = navigator.userAgent.toLowerCase();
-    const mobile =
-      /android|iphone|ipad|ipod|windows phone|mobile/i.test(ua);
-    setIsMobile(mobile);
-  }, []);
+  const router = useRouter()
+  const [text, setText] = useState('')
+  const fullText = 'Selamat Datang di Lisan'
+  const [index, setIndex] = useState(0)
+  const [deleting, setDeleting] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [os, setOs] = useState('unknown')
 
   useEffect(() => {
-    const speed = deleting ? 60 : 120;
-    const delay = deleting && index === 0 ? 1500 : speed;
-    const timeout = setTimeout(() => {
+    const ua = navigator.userAgent.toLowerCase()
+    const mobile = /android|iphone|ipad|ipod|mobile/i.test(ua)
+    setIsMobile(mobile)
+    if (/android/i.test(ua)) setOs('android')
+    else if (/iphone|ipad|ipod/i.test(ua)) setOs('ios')
+    else setOs('desktop')
+  }, [])
+
+  useEffect(() => {
+    const speed = deleting ? 60 : 120
+    const delay = deleting && index === 0 ? 1500 : speed
+    const t = setTimeout(() => {
       if (!deleting && index < fullText.length) {
-        setText(fullText.slice(0, index + 1));
-        setIndex(index + 1);
+        setText(fullText.slice(0, index + 1))
+        setIndex(index + 1)
       } else if (!deleting && index === fullText.length) {
-        setTimeout(() => setDeleting(true), 2500);
+        setTimeout(() => setDeleting(true), 2500)
       } else if (deleting && index > 0) {
-        setText(fullText.slice(0, index - 1));
-        setIndex(index - 1);
+        setText(fullText.slice(0, index - 1))
+        setIndex(index - 1)
       } else if (deleting && index === 0) {
-        setDeleting(false);
+        setDeleting(false)
       }
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [index, deleting]);
+    }, delay)
+    return () => clearTimeout(t)
+  }, [index, deleting])
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {})
+    }
+
+    let deferred: any = null
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault()
+      deferred = e
+      document.dispatchEvent(new CustomEvent('pwa-ready'))
+    })
+
+    document.addEventListener('pwa-install', async () => {
+      if (deferred) {
+        deferred.prompt()
+        await deferred.userChoice
+        deferred = null
+      }
+    })
+  }, [])
 
   const fadeUp = {
     hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  };
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  }
 
-  const goLogin = () => router.push("/authentication/signin");
-  const goSignup = () => router.push("/authentication/signup");
+  const goLogin = () => router.push('/authentication/signin')
+  const goSignup = () => router.push('/authentication/signup')
 
   const downloadApp = () => {
-    if (/android/i.test(navigator.userAgent)) {
-      window.location.href = "https://play.google.com";
-    } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-      window.location.href = "https://apps.apple.com";
+    if (os === 'android') {
+      window.location.href = 'https://play.google.com/store/apps'
+      setTimeout(() => {
+        window.location.href = '/downloads/lisan.apk'
+      }, 1800)
+    } else if (os === 'ios') {
+      window.location.href = 'https://apps.apple.com'
     } else {
-      window.location.href = "/";
+      router.push('/download')
     }
-  };
+  }
 
   return (
     <div className="relative flex flex-col min-h-screen bg-[#f5f7fa] text-black overflow-hidden">
@@ -81,29 +105,26 @@ export default function LandingPage() {
             </span>
           </nav>
         ) : (
-          <button
-            onClick={downloadApp}
-            className="px-5 py-2 bg-[#027dda] text-white rounded-xl shadow hover:scale-105 transition"
-          >
+          <button onClick={downloadApp} className="px-5 py-2 bg-[#027dda] text-white rounded-xl shadow hover:scale-105 transition">
             Download App
           </button>
         )}
       </header>
 
-      <main className="flex-grow flex flex-col items-center justify-center text-center px-6 relative z-10 py-24 md:py-28">
+      <main className="flex-grow flex flex-col items-center justify-center text-center px-6 relative z-10 py-20">
         <motion.div variants={fadeUp} initial="hidden" animate="visible" className="w-full max-w-3xl mx-auto p-6 md:p-10 rounded-2xl bg-white/90 backdrop-blur-xl shadow-lg border border-[#027dda]/10">
           <h1 className="text-3xl md:text-5xl font-light mb-4 leading-snug">
-            {text.includes("Lisan") ? (
+            {text.includes('Lisan') ? (
               <>
-                {text.split("Lisan")[0]}
+                {text.split('Lisan')[0]}
                 <span className="font-semibold text-[#027dda] drop-shadow-[0_0_10px_#027dda]">Lisan</span>
-                {text.split("Lisan")[1]}
+                {text.split('Lisan')[1]}
               </>
             ) : text}
             <span className="animate-pulse text-[#027dda]">|</span>
           </h1>
 
-          <p className="text-gray-700 mt-4 text-sm md:text-base leading-relaxed">
+          <p className="text-gray-700 mt-3 text-sm md:text-base leading-relaxed">
             Lisan menghubungkan dunia melalui Bahasa Isyarat dengan kekuatan AI agar komunikasi dua arah menjadi lebih inklusif & natural.
           </p>
 
@@ -114,25 +135,25 @@ export default function LandingPage() {
                 <button onClick={goLogin} className="px-10 py-3 bg-white border border-[#f6bf4b] rounded-xl hover:bg-[#fff8e2] transition">Sudah Punya Akun?</button>
               </>
             ) : (
-              <button onClick={downloadApp} className="px-10 py-3 bg-[#027dda] text-white rounded-xl shadow hover:scale-105 transition">
-                Download Aplikasi
-              </button>
+              <button onClick={downloadApp} className="px-10 py-3 bg-[#027dda] text-white rounded-xl shadow hover:scale-105 transition">Download Aplikasi</button>
             )}
           </div>
+
+          <button id="pwa-install-btn" className="mt-6 px-6 py-2 border rounded-lg hidden">Pasang Aplikasi</button>
         </motion.div>
       </main>
 
-      <section className="relative py-20 md:py-24 px-6 z-10 bg-white/70 backdrop-blur-sm border-t border-[#027dda]/10">
+      <section className="relative py-16 px-6 z-10 bg-white/70 backdrop-blur-sm border-t border-[#027dda]/10">
         <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-semibold text-center mb-12">
           Fitur Utama <span className="text-[#027dda]">Lisan</span>
         </motion.h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {[
-            { icon: Brain, title: "AI Translation", desc: "Terjemahan real-time bahasa isyarat ↔ suara.", color: "#027dda" },
-            { icon: Heart, title: "Emotion Detection", desc: "Ekspresi tetap natural dengan AI emosi.", color: "#f6bf4b" },
-            { icon: Gamepad2, title: "Gamified Learning", desc: "Belajar isyarat seperti bermain game.", color: "#c82131" },
-            { icon: Accessibility, title: "Aksesibel", desc: "Untuk semua kalangan tanpa hambatan.", color: "#027dda" },
+            { icon: Brain, title: 'AI Translation', desc: 'Terjemahan real-time bahasa isyarat ↔ suara.', color: '#027dda' },
+            { icon: Heart, title: 'Emotion Detection', desc: 'Ekspresi tetap natural dengan AI emosi.', color: '#f6bf4b' },
+            { icon: Gamepad2, title: 'Gamified Learning', desc: 'Belajar isyarat seperti bermain game.', color: '#c82131' },
+            { icon: Accessibility, title: 'Aksesibel', desc: 'Untuk semua kalangan.', color: '#027dda' }
           ].map((f, i) => (
             <motion.div key={i} whileHover={{ scale: 1.05 }} className="p-8 rounded-2xl bg-white border shadow hover:shadow-xl transition">
               <f.icon className="w-10 h-10 mb-4" style={{ color: f.color }} />
@@ -143,16 +164,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="relative py-20 md:py-24 px-6 bg-white border-t border-[#027dda]/10 z-10">
+      <section className="relative py-16 px-6 bg-white border-t border-[#027dda]/10 z-10">
         <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-semibold text-center mb-12">
           Apa Kata Pengguna Kami
         </motion.h2>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {[
-            { name: "Dewi", role: "Guru Inklusi", text: "Lisan membantu interaksi dengan murid tunarungu lebih percaya diri!" },
-            { name: "Rafi", role: "Mahasiswa Tuli", text: "Komunikasi dua arah jadi setara dan lancar." },
-            { name: "Andi", role: "Relawan", text: "Belajar Bahasa Isyarat jadi jauh lebih menyenangkan." },
+            { name: 'Dewi', role: 'Guru Inklusi', text: 'Lisan membantu interaksi dengan murid tunarungu lebih percaya diri!' },
+            { name: 'Rafi', role: 'Mahasiswa Tuli', text: 'Komunikasi dua arah jadi setara dan lancar.' },
+            { name: 'Andi', role: 'Relawan', text: 'Belajar Bahasa Isyarat jadi jauh lebih menyenangkan.' }
           ].map((t, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.2 }} className="p-8 bg-white rounded-2xl border border-[#f6bf4b]/30 shadow hover:shadow-xl transition">
               <p className="text-gray-700 italic mb-4">“{t.text}”</p>
@@ -168,7 +189,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="relative py-20 md:py-28 px-6 text-center bg-gradient-to-b from-white to-[#f7f7f7] border-t border-[#027dda]/20 z-10">
+      <section className="relative py-20 px-6 text-center bg-gradient-to-b from-white to-[#f7f7f7] border-t border-[#027dda]/20 z-10">
         <motion.h2 variants={fadeUp} initial="hidden" whileInView="visible" className="text-3xl md:text-4xl font-bold mb-6">
           Bergabunglah dalam <span className="text-[#c82131]">Gerakan Inklusi Digital</span>
         </motion.h2>
@@ -207,10 +228,10 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-12 text-sm">
             {[
-              { title: "Produk", links: ["Fitur", "Pembaruan", "Metode Kami"] },
-              { title: "Perusahaan", links: ["Tentang Kami", "Inklusi"] },
-              { title: "Sumber", links: ["Komunitas", "Laporkan Bug"] },
-              { title: "Legal", links: ["Ketentuan", "Privasi"] },
+              { title: 'Produk', links: ['Fitur', 'Pembaruan', 'Metode Kami'] },
+              { title: 'Perusahaan', links: ['Tentang Kami', 'Inklusi'] },
+              { title: 'Sumber', links: ['Komunitas', 'Laporkan Bug'] },
+              { title: 'Legal', links: ['Ketentuan', 'Privasi'] }
             ].map((s, i) => (
               <div key={i}>
                 <h3 className="font-semibold mb-3">{s.title}</h3>
@@ -224,6 +245,20 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            document.addEventListener('pwa-ready', () => {
+              const b = document.getElementById('pwa-install-btn')
+              if (b) b.classList.remove('hidden')
+            })
+            document.getElementById('pwa-install-btn')?.addEventListener('click', () => {
+              document.dispatchEvent(new Event('pwa-install'))
+            })
+          `
+        }}
+      />
     </div>
-  );
+  )
 }
