@@ -53,9 +53,9 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   const mainMenu: MenuItem[] = [
     { name: "Home", href: "/admin/dashboard", icon: LayoutDashboard },
-    { name: "Users Management", href: "/admin/users", icon: Users },
-    { name: "Announcement Management", href: "/admin/announcements", icon: Megaphone },
-    { name: "Module Learning Management", href: "/admin/modules", icon: BookOpen },
+    { name: "Users Management", href: "/admin/user-management", icon: Users },
+    { name: "Announcement Management", href: "/admin/announcement-management", icon: Megaphone },
+    { name: "Module Learning Management", href: "/admin/module-managements", icon: BookOpen },
     { name: "Notification Management", href: "/admin/notifications", icon: Bell },
   ];
 
@@ -66,7 +66,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   return (
     <>
-      <aside className="flex flex-col justify-between h-screen w-72 bg-[#000000] text-[#e7e9ea] border-r border-[#1c9cf0]/30 rounded-tr-3xl rounded-br-3xl shadow-lg">
+      <aside className="flex flex-col justify-between h-screen w-85 bg-[#000000] text-[#e7e9ea] border-r border-[#1c9cf0]/30 rounded-tr-3xl rounded-br-3xl shadow-lg">
         <div className="p-2 flex justify-center mt-10 mb-6">
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#1c9cf0] to-[#ffffff] relative">
             Lisan
@@ -83,11 +83,11 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                   <div
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
                       isActive
-                        ? "bg-[#1c9cf0] text-[#ffffff] font-semibold"
+                        ? "bg-[#1c9cf0] text-white font-semibold shadow-[0_0_15px_#1c9cf0] animate-glow"
                         : "hover:bg-[#1c9cf0]/20 text-[#e7e9ea] font-normal"
                     }`}
                   >
-                    <Icon className={`h-4 w-4 ${isActive ? "text-[#ffffff]" : "text-[#1c9cf0]"}`} />
+                    <Icon className={`h-4 w-4 ${isActive ? "text-white drop-shadow-glow" : "text-[#1c9cf0]"}`} />
                     <span className="text-sm">{item.name}</span>
                   </div>
                 </Link>
@@ -106,7 +106,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
           <div ref={profileRef} className="relative flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#1c9cf0] flex items-center justify-center text-[#ffffff] font-bold text-sm">
+              <div className="w-10 h-10 rounded-full bg-[#1c9cf0] flex items-center justify-center text-white font-bold text-sm">
                 {user?.username?.[0]?.toUpperCase() || "A"}
               </div>
               <div>
@@ -118,7 +118,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             <div className="cursor-pointer relative" onClick={() => setShowProfileMenu(!showProfileMenu)}>
               <MoreHorizontal className="h-4 w-4 text-[#1c9cf0]" />
               {showProfileMenu && (
-                <div className="absolute top-0 left-full ml-2 bg-[#111111] border border-[#1c9cf0]/40 rounded-xl p-2 w-40 flex flex-col z-50 animate-fadeIn">
+                <div className="absolute -top-25 -left-6 ml-2 bg-[#111111] border border-[#1c9cf0]/40 rounded-xl p-2 w-40 flex flex-col z-50 animate-fadeIn">
                   {profileMenu.map((item) => (
                     <button
                       key={item.name}
@@ -164,11 +164,36 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
       <style jsx>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateX(-10px); }
-          to { opacity: 1; transform: translateX(0); }
+          from {
+            opacity: 0;
+            transform: translateX(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        /* Efek glow */
+        @keyframes glow {
+          0% {
+            box-shadow: 0 0 8px #1c9cf0, 0 0 16px #1c9cf0;
+          }
+          50% {
+            box-shadow: 0 0 20px #1c9cf0, 0 0 40px #1c9cf0;
+          }
+          100% {
+            box-shadow: 0 0 8px #1c9cf0, 0 0 16px #1c9cf0;
+          }
+        }
+        .animate-glow {
+          animation: glow 1.8s ease-in-out infinite;
+        }
+        .drop-shadow-glow {
+          filter: drop-shadow(0 0 6px #1c9cf0);
         }
       `}</style>
     </>

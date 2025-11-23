@@ -133,10 +133,12 @@
   --radius: 0.5rem;
 }
 
-html, body {
-  overscroll-behavior: none;
-  overflow: hidden;
-  height: 100%;
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
 }
 
 /* === Animated Primary Gradient Background (Blue - White) === */
@@ -165,28 +167,28 @@ html, body {
   0%, 15% {
     --a: 135deg;
     --p: 20%;
-    --c1: #1c9cf0; /* Primary Blue */
+    --c1: #027dda; /* Primary Blue */
     --c2: #ffffff; /* Primary Foreground */
     background-position: 0 0, var(--s) var(--s);
   }
   45%, 50% {
     --a: 90deg;
     --p: 25%;
-    --c1: #1c9cf0;
+    --c1: #f6bf4b;
     --c2: #ffffff;
     background-position: 0 0, var(--s) var(--s);
   }
   50.01%, 55% {
     --a: 90deg;
     --p: 25%;
-    --c2: #1c9cf0;
+    --c2: #f6bf4b;
     --c1: #ffffff;
     background-position: var(--s) 0, 0 var(--s);
   }
   85%, 100% {
     --a: 135deg;
     --p: 20%;
-    --c2: #1c9cf0;
+    --c2: #c82131;
     --c1: #ffffff;
     background-position: var(--s) 0, 0 var(--s);
   }

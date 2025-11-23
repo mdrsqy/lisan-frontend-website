@@ -2,12 +2,13 @@ import { create } from "zustand";
 import api from "../lib/api";
 
 interface User {
-  id?: string;
-  user_id?: number;
-  full_name: string;
-  email: string;
+  id: string;
+  name: string;               // backend pakai 'name'
   username: string;
+  email: string;
   role: string;
+  score?: number;
+  is_premium?: boolean;
   profile_picture?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -18,7 +19,7 @@ interface AuthState {
   loading: boolean;
   signin: (emailOrUsername: string, password: string) => Promise<void>;
   signup: (data: {
-    full_name: string;
+    name: string;
     username: string;
     email: string;
     password: string;
@@ -36,22 +37,33 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signin: async (emailOrUsername, password) => {
     set({ loading: true });
+
     try {
       const response = await api.post("/users/signin", {
         emailOrUsername,
         password,
       });
 
-      const user = response.data?.user;
+      const rawUser = response.data?.user;
       const token = response.data?.token;
 
-      if (response.data?.error) {
-        throw new Error(response.data.error);
-      }
-
-      if (!user || !token) {
+      if (!rawUser || !token) {
         throw new Error("Data login tidak valid");
       }
+
+      // ❗ Normalisasi user — hapus password untuk keamanan
+      const user: User = {
+        id: rawUser.id,
+        name: rawUser.name,
+        username: rawUser.username,
+        email: rawUser.email,
+        role: rawUser.role,
+        score: rawUser.score,
+        is_premium: rawUser.is_premium,
+        profile_picture: rawUser.profile_picture,
+        created_at: rawUser.created_at,
+        updated_at: rawUser.updated_at,
+      };
 
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
@@ -69,19 +81,29 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signup: async (data) => {
     set({ loading: true });
+
     try {
       const response = await api.post("/users/signup", data);
 
-      const user = response.data?.user;
+      const rawUser = response.data?.user;
       const token = response.data?.token;
 
-      if (response.data?.error) {
-        throw new Error(response.data.error);
-      }
-
-      if (!user || !token) {
+      if (!rawUser || !token) {
         throw new Error("Data signup tidak valid");
       }
+
+      const user: User = {
+        id: rawUser.id,
+        name: rawUser.name,
+        username: rawUser.username,
+        email: rawUser.email,
+        role: rawUser.role,
+        score: rawUser.score,
+        is_premium: rawUser.is_premium,
+        profile_picture: rawUser.profile_picture,
+        created_at: rawUser.created_at,
+        updated_at: rawUser.updated_at,
+      };
 
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);

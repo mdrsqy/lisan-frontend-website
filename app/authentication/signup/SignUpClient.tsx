@@ -8,11 +8,11 @@ import toast from "react-hot-toast";
 import NotificationStack from "../../../components/ui/notification";
 
 export default function SignUpClient() {
-  const [full_name, setName] = useState("");
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role] = useState("user");
+  const role = "user";
   const [showPassword, setShowPassword] = useState(false);
 
   const { signup, loading } = useAuthStore();
@@ -21,62 +21,73 @@ export default function SignUpClient() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!full_name.trim() || !username.trim() || !email.trim() || !password.trim()) {
+    if (!name.trim() || !username.trim() || !email.trim() || !password.trim()) {
       toast.error("Harap isi semua field terlebih dahulu");
       return;
     }
 
     try {
-      await signup({ full_name, username, email, password, role });
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      await signup({ name, username, email, password, role });
 
-      toast.success(`Akun ${user.full_name || "baru"} berhasil dibuat!`, {
-        duration: 2000,
-      });
+      toast.success(`Akun ${name} berhasil dibuat!`);
 
-      setTimeout(() => router.push("/authentication/signin"), 2200);
+      setTimeout(() => router.push("/authentication/signin"), 1800);
     } catch (err: any) {
       toast.error(err.message || "Gagal mendaftar, periksa kembali data Anda");
     }
   };
 
   return (
-    <div className="min-h-screen flex bg-[#000000] text-[#e7e9ea] overflow-hidden">
-      {/* 🔔 Global Notification */}
+    <div className="min-h-screen flex bg-[#f3f4f6] text-black overflow-hidden relative">
+
+      {/* Background pastel lembut */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-[#f7f8fa] to-[#f1f1f1]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(246,191,75,0.10),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_90%,rgba(2,125,218,0.10),transparent_70%)]" />
+      </div>
+
       <NotificationStack />
 
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-8 md:px-20 relative">
-        <div className="absolute inset-0 bg-[#1c9cf0]/10 backdrop-blur-md rounded-2xl shadow-[0_0_80px_#1c9cf0]/10" />
+      {/* Form */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-8 md:px-20 relative z-10">
+        <div className="w-full max-w-md bg-white/80 backdrop-blur-xl p-10 rounded-2xl shadow-[0_0_25px_rgba(0,0,0,0.08)] border border-[#027dda]/10">
 
-        <div className="w-full max-w-md relative z-10">
           <div className="mb-10 flex flex-col items-center text-center">
-            <div className="w-14 h-14 rounded-full bg-[#1c9cf0] flex items-center justify-center text-[#ffffff] font-bold text-xl shadow-[0_0_30px_#1c9cf0]/40">
-              H
+            <div className="w-16 h-16 rounded-full bg-white shadow-[0_0_15px_#027dda33] flex items-center justify-center">
+              <img
+                src="/lisan-logo.png"
+                alt="Lisan Logo"
+                className="w-10 h-10 object-contain"
+              />
             </div>
-            <h1 className="mt-6 text-4xl font-light text-[#e7e9ea]">Buat Akun</h1>
-            <p className="text-[#e7e9ea]/70 mt-2">
-              Bergabunglah dengan{" "}
-              <span className="font-semibold text-[#ffffff]">Lisan</span>.
+
+            <h1 className="mt-6 text-4xl font-semibold text-black">
+              Buat Akun
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Bergabunglah dengan <span className="font-semibold text-[#027dda]">Lisan</span>
             </p>
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Name */}
             <div>
-              <label className="block text-sm text-[#e7e9ea]/80 mb-2">
+              <label className="block text-sm text-gray-600 mb-1">
                 Nama Lengkap
               </label>
               <input
                 type="text"
-                value={full_name}
+                value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nama Anda"
-                className="w-full px-4 py-3 rounded-xl bg-[#1c9cf0]/10 text-[#e7e9ea] placeholder-[#e7e9ea]/50
-                focus:ring-2 focus:ring-[#1c9cf0] outline-none shadow-inner shadow-[#000000]/40 transition-all duration-300"
+                className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 text-black placeholder-gray-500 focus:ring-2 focus:ring-[#027dda] outline-none transition-all"
               />
             </div>
 
+            {/* Username */}
             <div>
-              <label className="block text-sm text-[#e7e9ea]/80 mb-2">
+              <label className="block text-sm text-gray-600 mb-1">
                 Username
               </label>
               <input
@@ -84,13 +95,13 @@ export default function SignUpClient() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Username"
-                className="w-full px-4 py-3 rounded-xl bg-[#1c9cf0]/10 text-[#e7e9ea] placeholder-[#e7e9ea]/50
-                focus:ring-2 focus:ring-[#1c9cf0] outline-none shadow-inner shadow-[#000000]/40 transition-all duration-300"
+                className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 text-black placeholder-gray-500 focus:ring-2 focus:ring-[#027dda] outline-none transition-all"
               />
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-sm text-[#e7e9ea]/80 mb-2">
+              <label className="block text-sm text-gray-600 mb-1">
                 Email
               </label>
               <input
@@ -98,28 +109,29 @@ export default function SignUpClient() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="contoh@email.com"
-                className="w-full px-4 py-3 rounded-xl bg-[#1c9cf0]/10 text-[#e7e9ea] placeholder-[#e7e9ea]/50
-                focus:ring-2 focus:ring-[#1c9cf0] outline-none shadow-inner shadow-[#000000]/40 transition-all duration-300"
+                className="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 text-black placeholder-gray-500 focus:ring-2 focus:ring-[#027dda] outline-none transition-all"
               />
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-sm text-[#e7e9ea]/80 mb-2">
+              <label className="block text-sm text-gray-600 mb-1">
                 Kata Sandi
               </label>
+
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-12 rounded-xl bg-[#1c9cf0]/10 text-[#e7e9ea] placeholder-[#e7e9ea]/50
-                  focus:ring-2 focus:ring-[#1c9cf0] outline-none shadow-inner shadow-[#000000]/40 transition-all duration-300"
+                  className="w-full px-4 py-3 pr-12 rounded-xl bg-white border border-gray-300 text-black placeholder-gray-500 focus:ring-2 focus:ring-[#027dda] outline-none transition-all"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-3 text-[#e7e9ea]/70 hover:text-[#ffffff] transition-colors"
+                  className="absolute right-4 top-3 text-gray-500 hover:text-[#027dda] transition"
                 >
                   {showPassword ? (
                     <EyeOff size={20} strokeWidth={1.5} />
@@ -130,20 +142,20 @@ export default function SignUpClient() {
               </div>
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-[#1c9cf0] text-[#ffffff] font-semibold
-              hover:scale-[1.02] hover:shadow-[0_0_25px_#1c9cf0]/60 transition-transform duration-300 disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-[#027dda] text-white font-semibold hover:scale-[1.02] hover:shadow-[0_0_18px_#027dda66] transition disabled:opacity-50"
             >
               {loading ? "Memproses..." : "Daftar"}
             </button>
 
-            <p className="text-center text-sm text-[#e7e9ea]/80 mt-4">
+            <p className="text-center text-sm text-gray-600 mt-3">
               Sudah punya akun?{" "}
               <a
                 href="/authentication/signin"
-                className="text-[#1c9cf0] hover:text-[#ffffff] font-medium transition-all"
+                className="text-[#027dda] hover:text-[#c82131] font-medium transition"
               >
                 Masuk di sini
               </a>
@@ -152,8 +164,10 @@ export default function SignUpClient() {
         </div>
       </div>
 
-      <div className="hidden md:flex w-1/2 bg-[#000000] items-center justify-center border-l border-[#1c9cf0]/20">
-        <div className="animated-pattern w-full h-full rounded-1xl shadow-xl flex items-center justify-center text-[#e7e9ea] text-lg font-light border border-[#1c9cf0]/30" />
+      {/* Right visual */}
+      <div className="hidden md:flex w-1/2 items-center justify-center relative">
+        <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(circle_at_50%_50%,#027dda,transparent_70%)]" />
+        <div className="animated-pattern w-full h-full flex items-center justify-center text-gray-400 text-lg font-light" />
       </div>
     </div>
   );

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Twitter, Instagram, Facebook, Globe } from "lucide-react";
+import { motion } from "framer-motion";
+import { Twitter, Instagram, Facebook, Globe, Brain, Heart, Gamepad2, Accessibility } from "lucide-react";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -13,14 +14,14 @@ export default function LandingPage() {
 
   useEffect(() => {
     const typingSpeed = deleting ? 60 : 120;
-    const delay = deleting && index === 0 ? 1000 : typingSpeed;
+    const delay = deleting && index === 0 ? 1500 : typingSpeed;
 
     const timeout = setTimeout(() => {
       if (!deleting && index < fullText.length) {
         setText(fullText.slice(0, index + 1));
         setIndex(index + 1);
       } else if (!deleting && index === fullText.length) {
-        setTimeout(() => setDeleting(true), 2000);
+        setTimeout(() => setDeleting(true), 2500);
       } else if (deleting && index > 0) {
         setText(fullText.slice(0, index - 1));
         setIndex(index - 1);
@@ -28,135 +29,230 @@ export default function LandingPage() {
         setDeleting(false);
       }
     }, delay);
-
     return () => clearTimeout(timeout);
   }, [index, deleting]);
 
   const handleSignInClick = () => router.push("/authentication/signin");
   const handleSignUpClick = () => router.push("/authentication/signup");
 
+  const fadeUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  };
+
   return (
-    <div className="relative flex flex-col min-h-screen bg-[#000000] text-[#e7e9ea] overflow-hidden">
-      <header className="flex items-center justify-between px-45 py-6 bg-[#000000]/85 backdrop-blur-xl shadow-[0_0_25px_#1c9cf0]/20">
-        <div className="flex items-center space-x-6">
-          <div className="w-10 h-10 rounded-full bg-[#1c9cf0] flex items-center justify-center text-[#ffffff] font-bold text-lg shadow-md shadow-[#1c9cf0]/40">
-            H
-          </div>
-          <span className="text-lg font-semibold hover:text-[#1c9cf0] transition-colors cursor-default">
+    <div className="relative flex flex-col min-h-screen bg-[#f5f7fa] text-black overflow-hidden">
+
+      {/* NEW LIGHT THEME BACKGROUND */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#f8fafc] via-[#f5f7fa] to-[#eef2f6]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(2,125,218,0.12),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(246,191,75,0.10),transparent_70%)]" />
+      </div>
+
+      {/* HEADER */}
+      <header className="flex items-center justify-between px-50 py-6 bg-white/80 backdrop-blur-md border-b border-[#027dda]/20 z-20">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center space-x-3 cursor-pointer"
+        >
+          <img
+            src="/lisan-logo.png"
+            alt="Lisan Logo"
+            className="w-10 h-10 object-contain drop-shadow-[0_0_10px_#027dda]"
+          />
+          <span className="text-lg font-semibold hover:text-[#027dda] transition">
             Lisan
           </span>
-        </div>
+        </motion.div>
 
-        <nav className="flex items-center space-x-12">
+        <nav className="flex items-center space-x-8 text-sm font-medium">
           <span
             onClick={handleSignInClick}
-            className="text-[#e7e9ea]/80 hover:text-[#ffffff] cursor-pointer transition-all duration-300"
+            className="text-gray-700 hover:text-black cursor-pointer transition-all"
           >
             Masuk
           </span>
+
           <span
             onClick={handleSignUpClick}
-            className="text-[#ffffff] font-medium relative cursor-pointer hover:before:scale-x-100 before:content-[''] before:absolute before:bottom-[-4px] before:left-0 before:w-full before:h-[2px] before:bg-[#1c9cf0] before:scale-x-0 before:origin-left before:transition-transform before:duration-300"
+            className="text-black relative 
+              before:absolute before:bottom-[-3px] before:left-0 before:w-full before:h-[2px]
+              before:bg-[#f6bf4b] before:scale-x-0 hover:before:scale-x-100
+              before:transition-transform before:duration-300 cursor-pointer"
           >
             Daftar
           </span>
         </nav>
       </header>
 
-      <main className="flex-grow flex flex-col items-center justify-center text-center px-6 relative z-10 shadow-[0_0_40px_#1c9cf0]/10 bg-[#000000]/80 backdrop-blur-sm">
-        <div className="p-10 rounded-2xl bg-[#000000]/30 shadow-[0_0_50px_#1c9cf0]/20">
-          <h1 className="text-4xl md:text-5xl font-light mb-4 whitespace-pre">
+      {/* HERO */}
+      <main className="flex-grow flex flex-col items-center justify-center text-center px-6 relative z-10 py-28">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="max-w-3xl mx-auto p-10 rounded-2xl bg-white/90 backdrop-blur-xl shadow-lg border border-[#027dda]/10"
+        >
+          <h1 className="text-4xl md:text-5xl font-light mb-4">
             {text.includes("Lisan") ? (
               <>
                 {text.split("Lisan")[0]}
-                <span className="font-semibold text-[#1c9cf0]">
-                  Lisan
-                </span>
+                <span className="font-semibold text-[#027dda] drop-shadow-[0_0_10px_#027dda]">Lisan</span>
                 {text.split("Lisan")[1]}
               </>
-            ) : (
-              text
-            )}
-            <span className="animate-pulse">|</span>
+            ) : text}
+            <span className="animate-pulse text-[#027dda]">|</span>
           </h1>
 
-          <p className="text-[#e7e9ea]/80 max-w-xl mx-auto">
-            Platform cerdas untuk berbagi ide, membangun koneksi, dan menjelajahi inspirasi digital bersama komunitas kreatif.
+          <p className="text-gray-700 mt-4 leading-relaxed">
+            Lisan menghubungkan dunia melalui Bahasa Isyarat dengan kekuatan AI dengan menjadikan komunikasi dua arah lebih inklusif, emosional, dan natural.
           </p>
 
-          <div className="mt-8 flex space-x-8 justify-center">
-            <div
+          <div className="flex flex-col sm:flex-row gap-5 mt-8 justify-center">
+            <button
               onClick={handleSignUpClick}
-              className="px-8 py-3 bg-[#1c9cf0] rounded-xl text-[#ffffff] font-medium cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_#1c9cf0]/70 transition-all duration-300"
+              className="px-10 py-3 bg-[#027dda] text-white font-semibold rounded-xl shadow-[0_0_25px_#027dda]/40 hover:scale-105 transition-all"
             >
               Mulai Sekarang
-            </div>
-            <div
+            </button>
+
+            <button
               onClick={handleSignInClick}
-              className="px-8 py-3 rounded-xl bg-[#e7e9ea]/10 text-[#e7e9ea] cursor-pointer hover:bg-[#e7e9ea]/20 hover:text-[#ffffff] shadow-[0_0_15px_#1c9cf0]/20 transition-all duration-300"
+              className="px-10 py-3 bg-white border border-[#f6bf4b] rounded-xl text-black font-medium hover:bg-[#fff8e2] transition-all"
             >
               Sudah Punya Akun?
-            </div>
+            </button>
           </div>
-        </div>
+        </motion.div>
       </main>
 
-      <footer className="px-45 py-8 text-sm bg-[#000000]/85 backdrop-blur-xl shadow-[0_-0_25px_#1c9cf0]/20 relative z-10">
-        <div className="flex flex-col md:flex-row justify-between gap-10">
+      {/* FITUR UTAMA */}
+      <section className="relative py-24 px-8 z-10 bg-white/70 backdrop-blur-sm border-t border-[#027dda]/10">
+        <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-semibold text-center mb-14">
+          Fitur Utama <span className="text-[#027dda]">Lisan</span>
+        </motion.h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 max-w-6xl mx-auto">
+          {[
+            { icon: Brain, title: "AI Translation", desc: "Terjemahan dua arah real-time antara Bahasa Isyarat dan suara menggunakan AI multimodal.", color: "#027dda" },
+            { icon: Heart, title: "Emotion Detection", desc: "Teknologi pengenal emosi menjaga ekspresi dan makna komunikasi tetap natural.", color: "#f6bf4b" },
+            { icon: Gamepad2, title: "Gamified Learning", desc: "Belajar Bahasa Isyarat jadi menyenangkan dengan tantangan, level, dan AI coach interaktif.", color: "#c82131" },
+            { icon: Accessibility, title: "Inklusif & Aksesibel", desc: "Desain ramah pengguna, mudah diakses oleh siapa pun.", color: "#027dda" },
+          ].map((feature, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.05 }}
+              className="p-8 rounded-2xl bg-white border border-gray-200 shadow hover:shadow-xl transition-all"
+            >
+              <feature.icon className="w-10 h-10 mb-4" style={{ color: feature.color }} />
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+              <p className="text-gray-700 text-sm leading-relaxed">{feature.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* TESTIMONI */}
+      <section className="relative py-24 px-8 bg-white border-t border-[#027dda]/10 z-10">
+        <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-semibold text-center mb-14">
+          Apa Kata Pengguna Kami
+        </motion.h2>
+
+        <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+          {[
+            { name: "Dewi", role: "Guru Sekolah Inklusi", text: "Lisan membantu saya berinteraksi dengan murid tunarungu dengan lebih percaya diri dan natural!" },
+            { name: "Rafi", role: "Mahasiswa Tuli", text: "Aplikasinya keren banget! Saya bisa komunikasi dua arah tanpa hambatan, rasanya setara." },
+            { name: "Andi", role: "Relawan Komunitas", text: "Belajar Bahasa Isyarat di Lisan seperti main game — seru, cepat paham, dan bikin nagih." },
+          ].map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.2 }}
+              className="p-8 bg-white rounded-2xl border border-[#f6bf4b]/30 shadow hover:shadow-xl transition-all"
+            >
+              <p className="text-gray-700 italic mb-4">“{t.text}”</p>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-[#f6bf4b]/20 border border-[#f6bf4b]/50" />
+                <div>
+                  <h4 className="font-semibold">{t.name}</h4>
+                  <p className="text-sm text-gray-600">{t.role}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative py-28 px-6 text-center bg-gradient-to-b from-white to-[#f7f7f7] border-t border-[#027dda]/20 z-10">
+        <motion.h2 variants={fadeUp} initial="hidden" whileInView="visible" className="text-4xl font-bold mb-6">
+          Bergabunglah dalam <span className="text-[#c82131] drop-shadow-[0_0_10px_#c82131]">Gerakan Inklusi Digital</span>
+        </motion.h2>
+
+        <p className="text-gray-700 max-w-2xl mx-auto mb-10">
+          Jadilah bagian dari komunitas yang menjembatani komunikasi dengan AI. Ciptakan dunia yang lebih terbuka untuk semua.
+        </p>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={handleSignUpClick}
+          className="px-12 py-4 bg-[#c82131] text-white rounded-xl font-semibold shadow-[0_0_30px_#c82131]/40 hover:shadow-[0_0_40px_#c82131]/60 transition-all"
+        >
+          Mulai Sekarang Gratis
+        </motion.button>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="px-50 py-10 bg-white/80 backdrop-blur-md border-t border-[#027dda]/20">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex flex-col space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-[#1c9cf0] flex items-center justify-center text-[#ffffff] font-bold text-lg">
-                H
-              </div>
-              <span className="font-semibold">Lisan</span>
+              <img
+                src="/lisan-logo.png"
+                alt="Lisan Logo"
+                className="w-10 h-10 object-contain drop-shadow-[0_0_10px_#027dda]"
+              />
+              <span className="font-semibold text-lg">Lisan</span>
             </div>
-            <p className="text-[#e7e9ea]/70">© 2025 Lisan.com — Semua hak dilindungi.</p>
-            <div className="flex space-x-4 mt-2 text-[#e7e9ea]/80">
-              <Twitter className="w-5 h-5 cursor-pointer hover:text-[#1c9cf0] transition-colors" />
-              <Instagram className="w-5 h-5 cursor-pointer hover:text-[#1c9cf0] transition-colors" />
-              <Facebook className="w-5 h-5 cursor-pointer hover:text-[#1c9cf0] transition-colors" />
-              <Globe className="w-5 h-5 cursor-pointer hover:text-[#1c9cf0] transition-colors" />
+
+            <p className="text-gray-700 text-sm">
+              © 2025 Lisan — Membangun komunikasi inklusif dengan AI.
+            </p>
+
+            <div className="flex space-x-4 text-gray-600">
+              {[Twitter, Instagram, Facebook, Globe].map((Icon, i) => (
+                <Icon
+                  key={i}
+                  className="w-5 h-5 cursor-pointer hover:text-[#f6bf4b] transition-all"
+                />
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-20">
-            <div>
-              <h3 className="font-semibold mb-3">Produk</h3>
-              <ul className="space-y-2 text-[#e7e9ea]/80">
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Fitur</li>
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Harga & Paket</li>
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Catatan Pembaruan</li>
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Metode Kami</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-3">Perusahaan</h3>
-              <ul className="space-y-2 text-[#e7e9ea]/80">
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Tentang Kami</li>
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Keberagaman & Inklusi</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-3">Sumber Daya</h3>
-              <ul className="space-y-2 text-[#e7e9ea]/80">
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Komunitas</li>
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Syarat Layanan</li>
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Laporkan Kerentanan</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-3">Legalitas</h3>
-              <ul className="space-y-2 text-[#e7e9ea]/80">
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Syarat & Ketentuan</li>
-                <li className="hover:text-[#1c9cf0] cursor-pointer">Kebijakan Privasi</li>
-              </ul>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 text-sm">
+            {[
+              { title: "Produk", links: ["Fitur", "Harga & Paket", "Pembaruan", "Metode Kami"] },
+              { title: "Perusahaan", links: ["Tentang Kami", "Keberagaman & Inklusi"] },
+              { title: "Sumber Daya", links: ["Komunitas", "Syarat Layanan", "Laporkan Bug"] },
+              { title: "Legalitas", links: ["Syarat & Ketentuan", "Kebijakan Privasi"] },
+            ].map((section, idx) => (
+              <div key={idx}>
+                <h3 className="font-semibold mb-3">{section.title}</h3>
+                <ul className="space-y-2 text-gray-700">
+                  {section.links.map((link, i) => (
+                    <li key={i} className="hover:text-[#027dda] cursor-pointer transition-colors">{link}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
       </footer>
+
     </div>
   );
 }

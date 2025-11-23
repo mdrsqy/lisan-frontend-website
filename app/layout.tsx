@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
@@ -14,6 +13,12 @@ export const metadata: Metadata = {
   title: "Lisan",
   description:
     "Dashboard monitoring untuk aplikasi Lisan (Belajar Bahasa Isyarat)",
+
+  icons: {
+    icon: "/lisan-logo.png",       
+    shortcut: "/lisan-logo.png",    
+    apple: "/lisan-logo.png",      
+  },
 };
 
 export default function RootLayout({
@@ -25,7 +30,7 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         {children}
-        {/* Toaster for global notifications */}
+
         <Toaster
           position="top-center"
           reverseOrder={false}
@@ -39,13 +44,13 @@ export default function RootLayout({
             },
             success: {
               iconTheme: {
-                primary: "#1c9cf0", // purple-500
+                primary: "#1c9cf0",
                 secondary: "#fff",
               },
             },
             error: {
               iconTheme: {
-                primary: "#0004ffff", // pink-400
+                primary: "#0004ffff",
                 secondary: "#fff",
               },
             },
