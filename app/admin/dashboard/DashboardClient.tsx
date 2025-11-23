@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sidebar } from "../../../components/sidebar";
-import { useAuthStore } from "../../../lib/authStore";
+import { Sidebar } from "@/components/Sidebar";
+import { useAuthStore } from "@/lib/authStore";
 import { useRouter } from "next/navigation";
 
 export default function DashboardClient() {

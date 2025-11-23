@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { useAuthStore } from "../../../lib/authStore";
+import { useAuthStore } from "@/lib/authStore";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import NotificationStack from "../../../components/ui/notification";
+import NotificationStack from "@/components/ui/notification";
 
 export default function SignInClient() {
   const [emailOrUsername, setEmailOrUsername] = useState("");

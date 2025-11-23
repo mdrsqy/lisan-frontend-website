@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Sidebar } from "../../../components/sidebar";
-import { useAuthStore } from "../../../lib/authStore";
+
+import { Sidebar } from "@/components/Sidebar";
+import NotificationStack from "@/components/ui/notification";
+import Modal from "@/components/ui/modal";
+
+import { useAuthStore } from "@/lib/authStore";
+import api from "@/lib/api";
+
 import { useRouter } from "next/navigation";
-import api from "../../../lib/api";
-import toast from "react-hot-toast";
-import NotificationStack from "../../../components/ui/notification";
-import Modal from "../../../components/ui/modal";
 import { Pencil, Trash2, UserPlus } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface User {
   id: string;

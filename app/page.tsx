@@ -1,8 +1,18 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { Twitter, Instagram, Facebook, Globe, Brain, Heart, Gamepad2, Accessibility } from 'lucide-react'
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  Twitter,
+  Instagram,
+  Facebook,
+  Globe,
+  Brain,
+  Heart,
+  Gamepad2,
+  Accessibility
+} from "lucide-react";
 
 export default function LandingPage() {
   const router = useRouter()

@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Sidebar } from "../../../components/sidebar";
-import { useAuthStore } from "../../../lib/authStore";
+import { Sidebar } from "@/components/Sidebar";
+import { useAuthStore } from "@/lib/authStore";
 import { useRouter } from "next/navigation";
-import api from "../../../lib/api";
+import api from "@/lib/api";
 import toast from "react-hot-toast";
 import { Pencil, Trash2, ArrowUp, Plus } from "lucide-react";
-import NotificationStack from "../../../components/ui/notification";
+import NotificationStack from "@/components/ui/notification";
 
 interface Announcement {
   id: string;
