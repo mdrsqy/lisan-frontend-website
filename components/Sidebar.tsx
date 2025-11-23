@@ -13,6 +13,7 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuthStore } from "../lib/authStore";
 
 interface MenuItem {
@@ -40,13 +41,13 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
   }, [user, setUser]);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+    const handler = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setShowProfileMenu(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   if (!mounted) return null;
@@ -66,29 +67,42 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   return (
     <>
-      <aside className="flex flex-col justify-between h-screen w-85 bg-[#000000] text-[#e7e9ea] border-r border-[#1c9cf0]/30 rounded-tr-3xl rounded-br-3xl shadow-lg">
-        <div className="p-2 flex justify-center mt-10 mb-6">
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#1c9cf0] to-[#ffffff] relative">
+      <aside className="flex flex-col justify-between h-screen w-80 bg-white text-[#1a1a1a] border-r border-gray-200 shadow-md">
+
+        {/* LOGO + GRADIENT TEXT */}
+        <div className="p-2 flex flex-col items-center mt-8 mb-6">
+          <img
+            src="/lisan-logo.png"
+            alt="Lisan Logo"
+            className="w-14 h-14 mb-2"
+          />
+
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#027dda] via-[#f6bf4b] to-[#c82131] tracking-wide">
             Lisan
           </h1>
         </div>
 
-        <div className="flex flex-col p-4 space-y-6 flex-1">
-          <nav className="flex flex-col space-y-6">
+
+        {/* Navigation */}
+        <div className="flex flex-col p-4 space-y-4 flex-1">
+          <nav className="flex flex-col space-y-3">
             {mainMenu.map((item) => {
               const isActive = activeTab === item.href;
               const Icon = item.icon;
+
               return (
                 <Link key={item.name} href={item.href || "#"}>
                   <div
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 ${
-                      isActive
-                        ? "bg-[#1c9cf0] text-white font-semibold shadow-[0_0_15px_#1c9cf0] animate-glow"
-                        : "hover:bg-[#1c9cf0]/20 text-[#e7e9ea] font-normal"
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 ${isActive
+                        ? "bg-[#027dda] text-white shadow-md"
+                        : "hover:bg-gray-100 text-[#1a1a1a]"
+                      }`}
                   >
-                    <Icon className={`h-4 w-4 ${isActive ? "text-white drop-shadow-glow" : "text-[#1c9cf0]"}`} />
-                    <span className="text-sm">{item.name}</span>
+                    <Icon
+                      className={`h-5 w-5 ${isActive ? "text-white" : "text-[#027dda]"
+                        }`}
+                    />
+                    <span className="text-sm font-medium">{item.name}</span>
                   </div>
                 </Link>
               );
@@ -96,39 +110,51 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
           </nav>
         </div>
 
-        <div className="flex flex-col p-6 space-y-4 border-t border-[#1c9cf0]/30">
+        {/* Bottom profile */}
+        <div className="flex flex-col p-5 space-y-4 border-t border-gray-200 bg-white">
           <Link href="/admin/settings">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer hover:bg-[#1c9cf0]/20">
-              <Settings className="h-4 w-4 text-[#1c9cf0]" />
-              <span className="text-sm font-normal">Settings</span>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+              <Settings className="h-5 w-5 text-[#027dda]" />
+              <span className="text-sm font-medium">Settings</span>
             </div>
           </Link>
 
           <div ref={profileRef} className="relative flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#1c9cf0] flex items-center justify-center text-white font-bold text-sm">
-                {user?.username?.[0]?.toUpperCase() || "A"}
+              <div className="w-10 h-10 rounded-full bg-[#027dda] flex items-center justify-center text-white font-bold text-sm">
+                {user?.username?.[0]?.toUpperCase() || "U"}
               </div>
+
               <div>
-                <p className="text-xs font-normal">{user?.full_name || ""}</p>
-                <p className="text-[10px] text-[#1c9cf0]/80">{user?.email || ""}</p>
+                <p className="text-sm font-semibold">{user?.name || ""}</p>
+                <p className="text-xs text-gray-500">{user?.email || ""}</p>
               </div>
             </div>
 
             <div className="cursor-pointer relative" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-              <MoreHorizontal className="h-4 w-4 text-[#1c9cf0]" />
+              <MoreHorizontal className="h-5 w-5 text-[#027dda]" />
+
               {showProfileMenu && (
-                <div className="absolute -top-25 -left-6 ml-2 bg-[#111111] border border-[#1c9cf0]/40 rounded-xl p-2 w-40 flex flex-col z-50 animate-fadeIn">
-                  {profileMenu.map((item) => (
-                    <button
-                      key={item.name}
-                      onClick={item.action}
-                      className="flex items-center gap-2 px-3 py-2 text-[#e7e9ea] hover:bg-[#1c9cf0]/20 rounded-lg text-sm font-normal"
-                    >
-                      <item.icon className="w-4 h-4" />
-                      {item.name}
-                    </button>
-                  ))}
+                <div className="absolute -top-24 -left-10 bg-white border border-gray-200 rounded-xl p-2 w-40 shadow-lg z-50 animate-fadeIn">
+                  {profileMenu.map((item) =>
+                    item.action ? (
+                      <button
+                        key={item.name}
+                        onClick={item.action}
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg text-sm"
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {item.name}
+                      </button>
+                    ) : (
+                      <Link key={item.name} href={item.href || "#"}>
+                        <div className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg text-sm">
+                          <item.icon className="w-4 h-4" />
+                          {item.name}
+                        </div>
+                      </Link>
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -136,20 +162,23 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
         </div>
       </aside>
 
+      {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#000000] text-[#e7e9ea] p-6 rounded-xl w-96 border border-[#1c9cf0]/50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white text-black p-6 rounded-xl w-96 border border-gray-200 shadow-xl">
             <h3 className="text-lg font-semibold mb-4">Confirm Logout</h3>
             <p className="mb-6">Are you sure you want to log out?</p>
+
             <div className="flex justify-end gap-4">
               <button
-                className="px-4 py-2 rounded-lg border border-[#1c9cf0] hover:bg-[#1c9cf0]/20"
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
                 onClick={() => setShowLogoutModal(false)}
               >
                 Cancel
               </button>
+
               <button
-                className="px-4 py-2 rounded-lg bg-[#1c9cf0] text-[#ffffff] hover:bg-[#1c9cf0]/90"
+                className="px-4 py-2 rounded-lg bg-[#027dda] text-white hover:bg-[#027dda]/90 transition"
                 onClick={() => {
                   signout();
                   window.location.href = "/authentication/signin";
@@ -164,36 +193,11 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
       <style jsx>{`
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateX(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out forwards;
-        }
-
-        /* Efek glow */
-        @keyframes glow {
-          0% {
-            box-shadow: 0 0 8px #1c9cf0, 0 0 16px #1c9cf0;
-          }
-          50% {
-            box-shadow: 0 0 20px #1c9cf0, 0 0 40px #1c9cf0;
-          }
-          100% {
-            box-shadow: 0 0 8px #1c9cf0, 0 0 16px #1c9cf0;
-          }
-        }
-        .animate-glow {
-          animation: glow 1.8s ease-in-out infinite;
-        }
-        .drop-shadow-glow {
-          filter: drop-shadow(0 0 6px #1c9cf0);
+          animation: fadeIn 0.15s ease-out forwards;
         }
       `}</style>
     </>
