@@ -4,9 +4,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/authStore";
-import NotificationStack from "@/components/ui/notification";
 import GlobalLoader from "@/components/GlobalLoader";
-import { toast } from "react-hot-toast";
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div
@@ -28,35 +26,27 @@ export default function SignInClient() {
   const { signin, loading } = useAuthStore();
   const router = useRouter();
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!emailOrUsername.trim() || !password.trim()) {
-      toast.error("Harap isi semua field terlebih dahulu");
+      setErrorMessage("Harap isi semua field.");
       return;
     }
 
-    const t = toast.loading("Memproses...");
+    setErrorMessage("");
 
     try {
       await signin(emailOrUsername, password);
 
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-      toast.success(`Selamat datang kembali, ${user.name || "User"}!`, {
-        id: t,
-      });
-
       setTimeout(() => {
         router.push("/my");
-      }, 1000);
+      }, 500);
     } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Gagal masuk, periksa kembali data Anda",
-        { id: t }
+      setErrorMessage(
+        err?.response?.data?.message || "Gagal masuk, periksa kembali data Anda."
       );
     }
   };
@@ -65,21 +55,16 @@ export default function SignInClient() {
     e.preventDefault();
     setIsLoadingLocal(true);
 
-    const t = toast.loading("Mengalihkan...");
-
     setTimeout(() => {
-      toast.success("Menuju halaman pendaftaran...", { id: t });
       router.push("/sign-up");
-    }, 800);
+    }, 500);
   };
 
   return (
     <div className="relative min-h-screen bg-[#0A0F1C] text-slate-100 flex items-center justify-center">
       {(loading || isLoadingLocal) && <GlobalLoader messages={["Memuat..."]} />}
 
-      <NotificationStack />
-
-      <div className="w-full max-w-md px-4 relative z-10">
+      <div className="w-full max-w-md px-0 relative z-10">
         <button
           onClick={() => router.push("/")}
           className="absolute -top-12 left-6 text-slate-400 hover:text-white flex items-center gap-2 transition-colors group text-sm font-medium"
@@ -91,16 +76,22 @@ export default function SignInClient() {
         <GlassCard className="p-8 md:p-10 rounded-[2.5rem]">
           <div className="mb-8 flex flex-col items-center text-center">
             <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 shadow-lg shadow-blue-500/20 flex items-center justify-center mb-6 p-4">
-              <img src="/lisan.png" alt="Lisan Logo" className="w-full h-full object-contain drop-shadow-md" />
+              <img src="/lisan.png" alt="Lisan Logo" className="w-full h-full object-contain" />
             </div>
 
             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Selamat Datang</h1>
             <p className="text-slate-400 text-sm">
-              Masuk ke akun <span className="font-semibold text-blue-400">Lisan</span> Anda untuk melanjutkan
+              Masuk ke akun <span className="font-semibold text-blue-400">Lisan</span> Anda
             </p>
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {errorMessage && (
+              <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
+                {errorMessage}
+              </p>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2 pl-1">
                 Email / Username
@@ -117,7 +108,10 @@ export default function SignInClient() {
             <div>
               <div className="flex justify-between items-center mb-2 pl-1">
                 <label className="block text-sm font-medium text-slate-300">Kata Sandi</label>
-                <a href="/authentication/forgot-password" className="text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium">
+                <a
+                  href="/authentication/forgot-password"
+                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium"
+                >
                   Lupa kata sandi?
                 </a>
               </div>
