@@ -120,7 +120,7 @@ export default function LandingPage() {
             <span className="text-xl font-bold tracking-tight text-white hidden md:block">Lisan<span className="text-blue-400">.</span></span>
           </div>
 
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+          <div className="hidden md:flex items-center gap-8 text-m font-medium text-slate-300">
             {['Fitur', 'Manfaat', 'Cara Kerja', 'Harga'].map((item) => (
               <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`} className="hover:text-white transition-colors relative group py-2">
                 {item}
@@ -132,13 +132,13 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={() => handleAuthNavigation('/sign-in', 'signin')}
-              className="text-sm font-medium hover:text-white px-5 py-2.5 transition-colors hover:bg-white/5 rounded-full active:scale-95"
+              className="text-m font-medium hover:text-white px-5 py-2.5 transition-colors hover:bg-white/5 rounded-full active:scale-95"
             >
               Masuk
             </button>
             <button
               onClick={() => handleAuthNavigation('/sign-up', 'signup')}
-              className="px-6 py-2.5 bg-white text-slate-900 rounded-full text-sm font-bold hover:bg-blue-50 hover:text-blue-900 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] active:scale-95 transform hover:-translate-y-0.5"
+              className="px-6 py-2.5 bg-white text-slate-900 rounded-full text-m font-bold hover:bg-blue-50 hover:text-blue-900 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] active:scale-95 transform hover:-translate-y-0.5"
             >
               Daftar
             </button>
