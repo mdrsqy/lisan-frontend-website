@@ -1,7 +1,7 @@
 import SignInClient from "./SignInClient";
 
 export const metadata = {
-  title: "Login Akun",
+  title: "Login",
   description: "Masuk ke akun Lisan untuk mengelola data dan aktivitas Anda.",
 };
 

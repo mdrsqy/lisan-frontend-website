@@ -1,7 +1,7 @@
 import SignUpClient from "./SignUpClient";
 
 export const metadata = {
-  title: "Daftar Akun",
+  title: "Registrasi",
   description: "Buat akun baru untuk mulai menggunakan platform Lisan.",
 };
 

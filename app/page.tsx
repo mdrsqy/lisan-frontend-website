@@ -1,274 +1,553 @@
 'use client'
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import React, { useState } from "react"
+import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import {
-  Twitter,
-  Instagram,
-  Facebook,
-  Globe,
   Brain,
   Heart,
   Gamepad2,
-  Accessibility
-} from "lucide-react";
+  Users,
+  ArrowRight,
+  Download,
+  Zap,
+  MessageCircle,
+  ChevronDown,
+  CheckCircle2,
+  PlayCircle,
+  ScanFace,
+  Star,
+  Globe,
+  Twitter,
+  Instagram,
+  Facebook,
+  ShieldCheck,
+  Smartphone
+} from "lucide-react"
+import GlobalLoader from "@/components/GlobalLoader"
+
+const GlassCard = ({ children, className = "", hoverEffect = false }: { children: React.ReactNode, className?: string, hoverEffect?: boolean }) => (
+  <div className={`
+    relative overflow-hidden bg-white/5 backdrop-blur-2xl border border-white/10 
+    shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] 
+    ${hoverEffect ? "hover:border-blue-400/50 hover:bg-white/10 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(59,130,246,0.2)] cursor-pointer" : ""}
+    transition-all duration-300
+    ${className}
+  `}>
+    <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+    {children}
+  </div>
+)
+
+const SectionTitle = ({ title, subtitle, emoji, align = "center" }: { title: string, subtitle: string, emoji?: string, align?: "center" | "left" }) => (
+  <div className={`mb-16 relative z-10 ${align === "center" ? "text-center" : "text-left"}`}>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 mb-4 ${align === "center" ? "mx-auto" : ""}`}
+    >
+      {emoji && <span className="text-sm filter drop-shadow-md">{emoji}</span>}
+      <span className="text-xs font-bold tracking-widest text-blue-300 uppercase">{subtitle}</span>
+    </motion.div>
+    <motion.h2 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.1 }}
+      className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight"
+    >
+      {title}
+    </motion.h2>
+  </div>
+)
+
+const signInMessages = [
+  "Selamat datang kembali!"
+]
+
+const signUpMessages = [
+  "Selamat bergabung di Lisan!"
+]
 
 export default function LandingPage() {
   const router = useRouter()
-  const [text, setText] = useState('')
-  const fullText = 'Selamat Datang di Lisan'
-  const [index, setIndex] = useState(0)
-  const [deleting, setDeleting] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [os, setOs] = useState('unknown')
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadingMessages, setLoadingMessages] = useState<string[]>(signInMessages)
 
-  useEffect(() => {
-    const ua = navigator.userAgent.toLowerCase()
-    const mobile = /android|iphone|ipad|ipod|mobile/i.test(ua)
-    setIsMobile(mobile)
-    if (/android/i.test(ua)) setOs('android')
-    else if (/iphone|ipad|ipod/i.test(ua)) setOs('ios')
-    else setOs('desktop')
-  }, [])
-
-  useEffect(() => {
-    const speed = deleting ? 60 : 120
-    const delay = deleting && index === 0 ? 1500 : speed
-    const t = setTimeout(() => {
-      if (!deleting && index < fullText.length) {
-        setText(fullText.slice(0, index + 1))
-        setIndex(index + 1)
-      } else if (!deleting && index === fullText.length) {
-        setTimeout(() => setDeleting(true), 2500)
-      } else if (deleting && index > 0) {
-        setText(fullText.slice(0, index - 1))
-        setIndex(index - 1)
-      } else if (deleting && index === 0) {
-        setDeleting(false)
-      }
-    }, delay)
-    return () => clearTimeout(t)
-  }, [index, deleting])
-
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {})
-    }
-
-    let deferred: any = null
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault()
-      deferred = e
-      document.dispatchEvent(new CustomEvent('pwa-ready'))
-    })
-
-    document.addEventListener('pwa-install', async () => {
-      if (deferred) {
-        deferred.prompt()
-        await deferred.userChoice
-        deferred = null
-      }
-    })
-  }, [])
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-  }
-
-  const goLogin = () => router.push('/authentication/signin')
-  const goSignup = () => router.push('/authentication/signup')
-
-  const downloadApp = () => {
-    if (os === 'android') {
-      window.location.href = 'https://play.google.com/store/apps'
-      setTimeout(() => {
-        window.location.href = '/downloads/lisan.apk'
-      }, 1800)
-    } else if (os === 'ios') {
-      window.location.href = 'https://apps.apple.com'
+  const handleAuthNavigation = (path: string, type: 'signin' | 'signup') => {
+    if (type === 'signin') {
+      setLoadingMessages(signInMessages)
     } else {
-      router.push('/download')
+      setLoadingMessages(signUpMessages)
     }
+    setIsLoading(true)
+    setTimeout(() => {
+      router.push(path)
+    }, 100) 
   }
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-[#f5f7fa] text-black overflow-hidden">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#f8fafc] via-[#f5f7fa] to-[#eef2f6]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(2,125,218,0.12),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(246,191,75,0.10),transparent_70%)]" />
+    <div className="relative min-h-screen bg-[#0A0F1C] text-slate-100 font-sans selection:bg-blue-500/30 selection:text-blue-100 overflow-x-hidden">
+      
+      <AnimatePresence>
+        {isLoading && <GlobalLoader messages={loadingMessages} />}
+      </AnimatePresence>
+
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            x: [0, 100, -50, 0],
+            y: [0, 50, -50, 0],
+            opacity: [0.3, 0.5, 0.3]
+          }}
+          transition={{ 
+            duration: 15, 
+            repeat: Infinity, 
+            ease: "easeInOut",
+          }}
+          className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen" 
+        />
+        
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.5, 1],
+            x: [0, -100, 50, 0],
+            y: [0, -50, 50, 0],
+            opacity: [0.2, 0.4, 0.2]
+          }}
+          transition={{ 
+            duration: 20, 
+            repeat: Infinity, 
+            ease: "easeInOut",
+            delay: 2,
+          }}
+          className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-purple-600/15 rounded-full blur-[100px] mix-blend-screen" 
+        />
+        
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.3, 0.9, 1],
+            x: [0, 150, -100, 0],
+            y: [0, -100, 100, 0],
+            opacity: [0.1, 0.3, 0.1]
+          }}
+          transition={{ 
+            duration: 25, 
+            repeat: Infinity, 
+            ease: "linear",
+          }}
+          className="absolute top-[20%] left-[20%] w-[50vw] h-[50vw] bg-cyan-500/10 rounded-full blur-[130px]" 
+        />
+
+        <motion.div 
+          animate={{ 
+            x: [0, -50, 50, 0],
+            y: [0, 100, -100, 0],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ 
+            duration: 30, 
+            repeat: Infinity, 
+            ease: "linear",
+          }}
+          className="absolute bottom-[30%] left-[10%] w-[40vw] h-[40vw] bg-indigo-500/10 rounded-full blur-[100px]" 
+        />
       </div>
 
-      <header className="flex items-center justify-between px-6 md:px-20 py-5 bg-white/80 backdrop-blur-md border-b border-[#027dda]/20 z-20">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center space-x-3 cursor-pointer select-none">
-          <img src="/lisan-logo.png" alt="Lisan Logo" className="w-10 h-10 drop-shadow-[0_0_10px_#027dda]" />
-          <span className="text-lg font-semibold">Lisan</span>
-        </motion.div>
-
-        {!isMobile ? (
-          <nav className="flex items-center space-x-8 text-sm font-medium">
-            <span onClick={goLogin} className="text-gray-700 hover:text-black cursor-pointer">Masuk</span>
-            <span onClick={goSignup} className="text-black relative before:absolute before:bottom-[-3px] before:left-0 before:w-full before:h-[2px] before:bg-[#f6bf4b] before:scale-x-0 hover:before:scale-x-100 before:transition-transform cursor-pointer">
-              Daftar
-            </span>
-          </nav>
-        ) : (
-          <button onClick={downloadApp} className="px-5 py-2 bg-[#027dda] text-white rounded-xl shadow hover:scale-105 transition">
-            Download App
-          </button>
-        )}
-      </header>
-
-      <main className="flex-grow flex flex-col items-center justify-center text-center px-6 relative z-10 py-20">
-        <motion.div variants={fadeUp} initial="hidden" animate="visible" className="w-full max-w-3xl mx-auto p-6 md:p-10 rounded-2xl bg-white/90 backdrop-blur-xl shadow-lg border border-[#027dda]/10">
-          <h1 className="text-3xl md:text-5xl font-light mb-4 leading-snug">
-            {text.includes('Lisan') ? (
-              <>
-                {text.split('Lisan')[0]}
-                <span className="font-semibold text-[#027dda] drop-shadow-[0_0_10px_#027dda]">Lisan</span>
-                {text.split('Lisan')[1]}
-              </>
-            ) : text}
-            <span className="animate-pulse text-[#027dda]">|</span>
-          </h1>
-
-          <p className="text-gray-700 mt-3 text-sm md:text-base leading-relaxed">
-            Lisan menghubungkan dunia melalui Bahasa Isyarat dengan kekuatan AI agar komunikasi dua arah menjadi lebih inklusif & natural.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-5 mt-8 justify-center">
-            {!isMobile ? (
-              <>
-                <button onClick={goSignup} className="px-10 py-3 bg-[#027dda] text-white rounded-xl shadow hover:scale-105 transition">Mulai Sekarang</button>
-                <button onClick={goLogin} className="px-10 py-3 bg-white border border-[#f6bf4b] rounded-xl hover:bg-[#fff8e2] transition">Sudah Punya Akun?</button>
-              </>
-            ) : (
-              <button onClick={downloadApp} className="px-10 py-3 bg-[#027dda] text-white rounded-xl shadow hover:scale-105 transition">Download Aplikasi</button>
-            )}
+      <nav className="fixed w-full z-50 px-4 py-4 md:px-8 transition-all duration-300 bottom-0 md:top-0 md:bottom-auto">
+        <GlassCard className="max-w-7xl mx-auto rounded-2xl md:rounded-full px-4 py-3 md:px-6 flex items-center justify-between !bg-[#0A0F1C]/80 supports-[backdrop-filter]:bg-[#0A0F1C]/60 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] md:shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.scrollTo({top:0, behavior:'smooth'})}>
+            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform active:scale-95 p-1.5">
+              <img src="/lisan.png" alt="Lisan Logo" className="w-full h-full object-contain" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-white">Lisan<span className="text-blue-400">.</span></span>
           </div>
 
-          <button id="pwa-install-btn" className="mt-6 px-6 py-2 border rounded-lg hidden">Pasang Aplikasi</button>
-        </motion.div>
-      </main>
-
-      <section className="relative py-16 px-6 z-10 bg-white/70 backdrop-blur-sm border-t border-[#027dda]/10">
-        <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-semibold text-center mb-12">
-          Fitur Utama <span className="text-[#027dda]">Lisan</span>
-        </motion.h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          {[
-            { icon: Brain, title: 'AI Translation', desc: 'Terjemahan real-time bahasa isyarat ↔ suara.', color: '#027dda' },
-            { icon: Heart, title: 'Emotion Detection', desc: 'Ekspresi tetap natural dengan AI emosi.', color: '#f6bf4b' },
-            { icon: Gamepad2, title: 'Gamified Learning', desc: 'Belajar isyarat seperti bermain game.', color: '#c82131' },
-            { icon: Accessibility, title: 'Aksesibel', desc: 'Untuk semua kalangan.', color: '#027dda' }
-          ].map((f, i) => (
-            <motion.div key={i} whileHover={{ scale: 1.05 }} className="p-8 rounded-2xl bg-white border shadow hover:shadow-xl transition">
-              <f.icon className="w-10 h-10 mb-4" style={{ color: f.color }} />
-              <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
-              <p className="text-gray-700 text-sm">{f.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      <section className="relative py-16 px-6 bg-white border-t border-[#027dda]/10 z-10">
-        <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-semibold text-center mb-12">
-          Apa Kata Pengguna Kami
-        </motion.h2>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[
-            { name: 'Dewi', role: 'Guru Inklusi', text: 'Lisan membantu interaksi dengan murid tunarungu lebih percaya diri!' },
-            { name: 'Rafi', role: 'Mahasiswa Tuli', text: 'Komunikasi dua arah jadi setara dan lancar.' },
-            { name: 'Andi', role: 'Relawan', text: 'Belajar Bahasa Isyarat jadi jauh lebih menyenangkan.' }
-          ].map((t, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.2 }} className="p-8 bg-white rounded-2xl border border-[#f6bf4b]/30 shadow hover:shadow-xl transition">
-              <p className="text-gray-700 italic mb-4">“{t.text}”</p>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-[#f6bf4b]/20 border border-[#f6bf4b]/50" />
-                <div>
-                  <h4 className="font-semibold">{t.name}</h4>
-                  <p className="text-sm text-gray-600">{t.role}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      <section className="relative py-20 px-6 text-center bg-gradient-to-b from-white to-[#f7f7f7] border-t border-[#027dda]/20 z-10">
-        <motion.h2 variants={fadeUp} initial="hidden" whileInView="visible" className="text-3xl md:text-4xl font-bold mb-6">
-          Bergabunglah dalam <span className="text-[#c82131]">Gerakan Inklusi Digital</span>
-        </motion.h2>
-
-        <p className="text-gray-700 max-w-2xl mx-auto mb-10">
-          Jadilah bagian dari komunitas yang membangun komunikasi tanpa hambatan.
-        </p>
-
-        {!isMobile ? (
-          <motion.button whileHover={{ scale: 1.05 }} onClick={goSignup} className="px-12 py-4 bg-[#c82131] text-white rounded-xl shadow hover:shadow-xl transition">
-            Mulai Sekarang
-          </motion.button>
-        ) : (
-          <motion.button whileHover={{ scale: 1.05 }} onClick={downloadApp} className="px-12 py-4 bg-[#027dda] text-white rounded-xl shadow hover:shadow-xl transition">
-            Download Aplikasi
-          </motion.button>
-        )}
-      </section>
-
-      <footer className="px-6 md:px-20 py-10 bg-white/80 backdrop-blur-md border-t border-[#027dda]/20">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="flex flex-col space-y-4">
-            <div className="flex items-center space-x-3">
-              <img src="/lisan-logo.png" alt="Lisan Logo" className="w-10 h-10 drop-shadow-[0_0_10px_#027dda]" />
-              <span className="font-semibold text-lg">Lisan</span>
-            </div>
-
-            <p className="text-gray-700 text-sm">© 2025 Lisan — Membangun komunikasi inklusif dengan AI.</p>
-
-            <div className="flex space-x-4 text-gray-600">
-              {[Twitter, Instagram, Facebook, Globe].map((Icon, i) => (
-                <Icon key={i} className="w-5 h-5 cursor-pointer hover:text-[#f6bf4b]" />
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-12 text-sm">
-            {[
-              { title: 'Produk', links: ['Fitur', 'Pembaruan', 'Metode Kami'] },
-              { title: 'Perusahaan', links: ['Tentang Kami', 'Inklusi'] },
-              { title: 'Sumber', links: ['Komunitas', 'Laporkan Bug'] },
-              { title: 'Legal', links: ['Ketentuan', 'Privasi'] }
-            ].map((s, i) => (
-              <div key={i}>
-                <h3 className="font-semibold mb-3">{s.title}</h3>
-                <ul className="space-y-2 text-gray-700">
-                  {s.links.map((l, idx) => (
-                    <li key={idx} className="hover:text-[#027dda] cursor-pointer">{l}</li>
-                  ))}
-                </ul>
-              </div>
+          <div className="hidden md:flex items-center gap-8 text-m font-medium text-slate-300">
+            {['Fitur', 'Manfaat', 'Cara Kerja', 'Harga'].map((item) => (
+              <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`} className="hover:text-white transition-colors relative group py-2">
+                {item}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all group-hover:w-full"></span>
+              </a>
             ))}
           </div>
+
+          <div className="hidden md:flex items-center gap-3">
+            <button 
+                onClick={() => handleAuthNavigation('/sign-in', 'signin')} 
+                className="text-m font-medium hover:text-white px-4 py-2 transition-colors hover:bg-white/5 rounded-full active:scale-95"
+            >
+              Masuk
+            </button>
+            <button 
+                onClick={() => handleAuthNavigation('/sign-up', 'signup')} 
+                className="px-6 py-2.5 bg-white text-slate-900 rounded-full text-m font-bold hover:bg-blue-50 hover:text-blue-900 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] active:scale-95 transform hover:-translate-y-0.5"
+            >
+              Daftar
+            </button>
+          </div>
+
+          <div className="flex md:hidden">
+            <button onClick={() => window.open('https://play.google.com')} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 active:scale-95 hover:bg-blue-500 transition-all">
+              <Download className="w-4 h-4" />
+              Unduh App
+            </button>
+          </div>
+        </GlassCard>
+      </nav>
+
+      <section className="relative pt-20 md:pt-48 pb-32 px-6 overflow-hidden min-h-screen flex items-center justify-center">
+        <div className="max-w-6xl mx-auto text-center relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer hover:border-blue-500/30 group">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]" />
+              <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Versi 2.0 Beta Kini Tersedia</span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1] mb-8">
+              The Voice of <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 animate-gradient-x">Hands</span>
+            </h1>
+            
+            <p className="text-lg md:text-2xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
+              Menghadirkan jembatan komunikasi yang inklusif melalui kekuatan AI. Menerjemahkan bahasa isyarat secara <span className="text-white font-medium">real-time</span>, memahami <span className="text-white font-medium">konteks</span>, dan menangkap <span className="text-white font-medium">emosi</span> dalam setiap interaksi.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-16 sm:mb-0">
+              <button 
+                onClick={() => handleAuthNavigation('/sign-up', 'signup')}
+                className="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl font-bold text-white shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  Mulai Gratis <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              </button>
+              
+              <button className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-white hover:bg-white/10 hover:border-white/20 backdrop-blur-md transition-all flex items-center justify-center gap-2 group active:scale-95">
+                <PlayCircle className="w-5 h-5 text-blue-400 group-hover:text-white transition-colors group-hover:scale-110 duration-300" /> 
+                Lihat Demo
+              </button>
+            </div>
+
+            <div className="mt-10 sm:mt-20 pt-10 border-t border-white/5 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                {[
+                    { val: "98%", label: "Akurasi AI" },
+                    { val: "22Jt+", label: "Komunitas Disabilitas" },
+                    { val: "<0.5s", label: "Latensi Ultra-Rendah" },
+                    { val: "2 Arah", label: "Komunikasi Lancar" }
+                ].map((stat, i) => (
+                    <div key={i} className="hover:bg-white/5 p-2 rounded-xl transition-colors cursor-default">
+                        <div className="text-3xl font-bold text-white mb-1">{stat.val}</div>
+                        <div className="text-sm text-slate-500 font-medium">{stat.label}</div>
+                    </div>
+                ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section id="fitur" className="py-24 px-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <SectionTitle title="Inovasi Teknologi Inklusif." subtitle="FITUR UTAMA" emoji="⚡️" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
+            <GlassCard className="md:col-span-2 md:row-span-2 p-6 md:p-10 rounded-[2.5rem] flex flex-col justify-between group border border-white/5 hover:border-blue-500/30" hoverEffect={true}>
+              <div>
+                <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 text-blue-400 border border-blue-500/20 group-hover:scale-110 transition-transform duration-300 group-hover:bg-blue-500 group-hover:text-white">
+                    <ScanFace className="w-8 h-8" />
+                </div>
+                <h3 className="text-3xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors">Penerjemah Dua Arah Cerdas</h3>
+                <p className="text-slate-400 text-lg leading-relaxed max-w-lg group-hover:text-slate-200 transition-colors">
+                    Ciptakan percakapan yang mengalir tanpa hambatan. Terjemahkan Bahasa Isyarat (BISINDO/SIBI) menjadi teks atau suara secara instan, dan ubah ucapan lawan bicara menjadi visualisasi avatar 3D yang presisi.
+                </p>
+              </div>
+              <div className="mt-10 flex flex-wrap gap-3">
+                 {['TensorFlow', 'MediaPipe', 'TCN Model'].map(tag => (
+                    <span key={tag} className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-xs font-mono text-blue-300 group-hover:bg-blue-500/20 group-hover:border-blue-500/30 transition-colors">{tag}</span>
+                 ))}
+              </div>
+              <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-blue-600/20 transition-colors" />
+            </GlassCard>
+
+            <GlassCard className="p-6 md:p-8 rounded-[2.5rem] group" hoverEffect={true}>
+               <div className="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center mb-4 text-pink-400 border border-pink-500/20 group-hover:scale-110 transition-transform duration-300 group-hover:bg-pink-500 group-hover:text-white">
+                   <Heart className="w-6 h-6" />
+               </div>
+               <h3 className="text-xl font-bold mb-2 group-hover:text-pink-300 transition-colors">Deteksi Emosi & Ekspresi</h3>
+               <p className="text-slate-400 text-sm leading-relaxed group-hover:text-slate-200">
+                   Komunikasi lebih dari sekadar kata. AI kami menangkap nuansa emosi—senang, sedih, marah—agar avatar merepresentasikan perasaan Anda yang sesungguhnya.
+               </p>
+            </GlassCard>
+
+            <GlassCard className="p-6 md:p-8 rounded-[2.5rem] group" hoverEffect={true}>
+                <div className="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4 text-cyan-400 border border-cyan-500/20 group-hover:scale-110 transition-transform duration-300 group-hover:bg-cyan-500 group-hover:text-white">
+                    <Gamepad2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-2 group-hover:text-cyan-300 transition-colors">Pembelajaran Tergamifikasi</h3>
+                <p className="text-slate-400 text-sm leading-relaxed group-hover:text-slate-200">
+                    Kuasai bahasa isyarat dengan cara yang menyenangkan. Raih poin, naikkan level, dan dapatkan lencana di setiap pencapaian belajar Anda.
+                </p>
+            </GlassCard>
+
+            <GlassCard className="md:col-span-3 lg:col-span-1 p-6 md:p-8 rounded-[2.5rem] group flex items-center gap-6" hoverEffect={true}>
+                <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex-shrink-0 flex items-center justify-center text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform duration-300 group-hover:bg-purple-500 group-hover:text-white">
+                    <Users className="w-6 h-6" />
+                </div>
+                <div>
+                    <h3 className="text-xl font-bold mb-1 group-hover:text-purple-300 transition-colors">Mesin Avatar 3D</h3>
+                    <p className="text-slate-400 text-sm group-hover:text-slate-200">Visualisasi gerakan tangan yang halus, natural, dan mudah dipahami oleh semua kalangan.</p>
+                </div>
+            </GlassCard>
+          </div>
+        </div>
+      </section>
+
+      <section id="manfaat" className="py-24 px-6 bg-gradient-to-b from-transparent to-black/20">
+        <div className="max-w-7xl mx-auto">
+            <SectionTitle title="Mengapa Memilih Lisan?" subtitle="KEUNGGULAN" emoji="💎" />
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                    { title: "Komunikasi Natural", desc: "Interaksi yang mengalir dan tidak kaku. Algoritma canggih kami memahami konteks kalimat dan intonasi bicara.", icon: MessageCircle },
+                    { title: "Aksesibilitas Tanpa Batas", desc: "Jembatan penghubung antara Teman Tuli dan Teman Dengar untuk berinteraksi di mana saja dan kapan saja.", icon: ShieldCheck },
+                    { title: "Fleksibilitas Belajar", desc: "Akses modul pembelajaran komprehensif kapan saja langsung dari smartphone Anda dengan antarmuka intuitif.", icon: Smartphone },
+                    { title: "Komunitas Inklusif", desc: "Bergabunglah dengan jaringan ribuan pengguna yang peduli pada kesetaraan, empati, dan inklusivitas.", icon: Globe },
+                    { title: "Umpan Balik Instan", desc: "AI Coach pribadi memberikan koreksi langsung jika gerakan isyarat Anda kurang tepat, mempercepat proses belajar.", icon: CheckCircle2 },
+                    { title: "Privasi Terjamin", desc: "Keamanan data adalah prioritas utama kami. Seluruh percakapan diproses dengan standar enkripsi tingkat tinggi.", icon: Zap },
+                ].map((item, i) => (
+                    <GlassCard key={i} className="p-6 md:p-8 rounded-3xl hover:bg-white/10 transition-colors group" hoverEffect={true}>
+                        <item.icon className="w-8 h-8 text-blue-400 mb-4 group-hover:scale-110 transition-transform duration-300 group-hover:text-blue-300" />
+                        <h3 className="text-lg font-bold mb-2 text-white group-hover:text-blue-200">{item.title}</h3>
+                        <p className="text-slate-400 text-sm leading-relaxed group-hover:text-slate-200">{item.desc}</p>
+                    </GlassCard>
+                ))}
+            </div>
+        </div>
+      </section>
+
+      <section id="cara-kerja" className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+            <SectionTitle title="Mulai dalam Hitungan Detik." subtitle="CARA KERJA" emoji="⚙️" />
+            
+            <div className="grid md:grid-cols-3 gap-8 relative">
+                <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-blue-500/0 via-blue-500/20 to-blue-500/0 border-t border-dashed border-slate-700" />
+
+                {[
+                    { step: "01", title: "Input Media", desc: "Cukup nyalakan kamera untuk menangkap bahasa isyarat, atau gunakan mikrofon untuk input suara Anda.", icon: Zap },
+                    { step: "02", title: "Pemrosesan AI", desc: "Engine cerdas kami mendeteksi 21 titik landmark tangan dan melakukan analisis ekspresi wajah secara real-time.", icon: Brain },
+                    { step: "03", title: "Hasil Instan", desc: "Terima terjemahan dalam bentuk teks, suara, atau animasi avatar yang akurat dan ekspresif seketika.", icon: MessageCircle },
+                ].map((item, i) => (
+                    <GlassCard key={i} className="relative p-6 md:p-10 rounded-[2rem] text-center group" hoverEffect={true}>
+                        <div className="w-20 h-20 mx-auto bg-[#0A0F1C] border border-white/10 rounded-3xl flex items-center justify-center mb-8 shadow-2xl relative z-10 group-hover:scale-110 transition-transform duration-300 group-hover:border-blue-500/50 group-hover:shadow-blue-500/20">
+                            <item.icon className="w-8 h-8 text-blue-400 group-hover:text-white" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-3 group-hover:text-blue-300">{item.title}</h3>
+                        <p className="text-slate-400 text-sm leading-relaxed group-hover:text-slate-200">{item.desc}</p>
+                    </GlassCard>
+                ))}
+            </div>
+        </div>
+      </section>
+
+      <section id="social-proof" className="py-24 px-6 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+            <SectionTitle title="Dipercaya oleh Komunitas." subtitle="TESTIMONI" emoji="💙" />
+            
+            <div className="grid md:grid-cols-3 gap-6">
+                {[
+                    { name: "Andi Saputra", role: "Teman Tuli", text: "Sebuah terobosan! Sekarang saya bisa memesan kopi dan mengobrol santai dengan barista tanpa perlu menulis di kertas. Sangat membebaskan.", color: "bg-blue-500" },
+                    { name: "Siti Aminah", role: "Manajer HRD", text: "Lisan sangat membantu proses wawancara kerja untuk kandidat disabilitas. Komunikasi berjalan lancar, profesional, dan inklusif.", color: "bg-purple-500" },
+                    { name: "Budi Santoso", role: "Mahasiswa", text: "Belajar BISINDO jadi serasa main game. Fitur rank dan XP bikin saya termotivasi untuk latihan setiap hari.", color: "bg-cyan-500" }
+                ].map((testi, i) => (
+                    <GlassCard key={i} className="p-6 md:p-8 rounded-3xl group" hoverEffect={true}>
+                        <div className="flex gap-1 text-yellow-500 mb-6 group-hover:scale-105 transition-transform origin-left">
+                            {[1,2,3,4,5].map(s => <Star key={s} size={16} fill="currentColor" />)}
+                        </div>
+                        <p className="text-slate-300 mb-8 italic text-lg group-hover:text-white transition-colors">"{testi.text}"</p>
+                        <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 rounded-full ${testi.color} flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:scale-110 transition-transform`}>
+                                {testi.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-white">{testi.name}</h4>
+                                <p className="text-sm text-slate-500 group-hover:text-slate-300">{testi.role}</p>
+                            </div>
+                        </div>
+                    </GlassCard>
+                ))}
+            </div>
+        </div>
+      </section>
+
+      <section id="investasi" className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+            <SectionTitle title="Investasi Cerdas untuk Masa Depan Inklusif." subtitle="INVESTASI" emoji="💳" />
+            
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+                <GlassCard className="p-6 md:p-10 rounded-[2.5rem] border-white/5 opacity-80 hover:opacity-100 transition-all hover:scale-[1.02] hover:border-white/20">
+                    <h3 className="text-2xl font-bold mb-2 text-white">Akses Dasar</h3>
+                    <p className="text-slate-400 mb-6">Solusi tepat untuk pemula & penggunaan harian</p>
+                    <div className="text-4xl font-bold text-white mb-8">Rp 0</div>
+                    <ul className="space-y-4 mb-8 text-slate-300">
+                        <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-blue-400" /> Penerjemah Teks/Suara Dasar</li>
+                        <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-blue-400" /> Akses Modul Pembelajaran Awal</li>
+                        <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-blue-400" /> Avatar Standar</li>
+                    </ul>
+                    <button 
+                        onClick={() => handleAuthNavigation('/sign-up', 'signup')}
+                        className="w-full py-4 rounded-xl border border-white/20 font-bold hover:bg-white/10 hover:border-white/40 transition-all active:scale-95"
+                    >
+                        Mulai Gratis
+                    </button>
+                </GlassCard>
+
+                <GlassCard className="p-6 md:p-10 rounded-[2.5rem] border-blue-500/30 bg-blue-500/5 relative overflow-hidden hover:border-blue-500/60 hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:scale-[1.03] transition-all">
+                    <div className="absolute top-0 right-0 px-4 py-1 bg-blue-500 text-white text-xs font-bold rounded-bl-xl shadow-lg">POPULAR</div>
+                    <h3 className="text-2xl font-bold mb-2 text-white">Lisan Premium</h3>
+                    <p className="text-slate-400 mb-6">Pengalaman penuh tanpa batas & fitur AI canggih</p>
+                    <div className="text-4xl font-bold text-white mb-8">Rp 56.000<span className="text-lg text-slate-500 font-normal">/bulan</span></div>
+                    <ul className="space-y-4 mb-8 text-slate-300">
+                        <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-400" /> Semua Fitur Gratis</li>
+                        <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-400" /> Deteksi Emosi AI Lanjutan</li>
+                        <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-400" /> Pembelajaran Tanpa Batas & XP</li>
+                        <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-400" /> AI Coach Pribadi</li>
+                    </ul>
+                    <button 
+                        onClick={() => handleAuthNavigation('/sign-up', 'signup')}
+                        className="w-full py-4 rounded-xl bg-blue-600 font-bold hover:bg-blue-500 hover:shadow-lg transition-all active:scale-95 shadow-blue-500/25"
+                    >
+                        Berlangganan Sekarang
+                    </button>
+                </GlassCard>
+            </div>
+        </div>
+      </section>
+
+      <section id="faq" className="py-24 px-6 max-w-3xl mx-auto">
+        <SectionTitle title="Pertanyaan yang Sering Diajukan." subtitle="FAQ" emoji="🤔" />
+        
+        <div className="space-y-4">
+            {[
+                { q: "Bahasa isyarat apa saja yang didukung?", a: "Saat ini Lisan mendukung penuh BISINDO (Bahasa Isyarat Indonesia) dan SIBI. Kami terus mengembangkan dukungan untuk variasi bahasa isyarat regional lainnya." },
+                { q: "Apakah aplikasi ini memerlukan koneksi internet?", a: "Ya, koneksi internet diperlukan untuk memastikan pemrosesan AI yang akurat, real-time, dan selalu terbarukan. Namun, kami sedang mengembangkan mode offline untuk kebutuhan dasar." },
+                { q: "Bisakah Lisan digunakan untuk keperluan profesional?", a: "Tentu saja! Banyak pengguna kami memanfaatkan Lisan untuk wawancara kerja, rapat, dan komunikasi layanan pelanggan di berbagai industri." },
+                { q: "Apakah tersedia di iOS dan Android?", a: "Ya, Lisan dapat diunduh dan digunakan secara gratis di kedua platform mobile utama tersebut." }
+            ].map((faq, i) => (
+                <GlassCard key={i} className="rounded-2xl overflow-hidden border-white/5 hover:border-white/20 transition-colors">
+                    <button 
+                        onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                        className="w-full flex items-center justify-between p-5 md:p-6 text-left hover:bg-white/5 transition-colors group"
+                    >
+                        <span className="font-bold text-slate-200 group-hover:text-white transition-colors">{faq.q}</span>
+                        <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform duration-300 group-hover:text-white ${openFaq === i ? "rotate-180" : ""}`} />
+                    </button>
+                    <AnimatePresence>
+                        {openFaq === i && (
+                            <motion.div 
+                                initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="p-5 md:p-6 pt-0 text-slate-400 text-sm leading-relaxed border-t border-white/5">
+                                    {faq.a}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </GlassCard>
+            ))}
+        </div>
+      </section>
+
+      <section className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+            <GlassCard className="relative rounded-[3rem] p-8 md:p-24 text-center overflow-hidden border-blue-500/20 group hover:border-blue-500/40 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-purple-900/40 opacity-50 group-hover:opacity-70 transition-opacity duration-500" />
+                
+                <div className="relative z-10">
+                    <h2 className="text-4xl md:text-7xl font-bold mb-8 text-white">Jadilah Bagian dari Revolusi Inklusi.</h2>
+                    <p className="text-slate-300 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
+                        Jangan biarkan perbedaan bahasa menjadi penghalang. Mulai langkah kecil Anda hari ini untuk Indonesia yang lebih setara.
+                    </p>
+                    <div className="flex flex-col sm:flex-row justify-center gap-5">
+                         <button className="px-10 py-5 bg-white text-blue-950 rounded-full font-bold hover:bg-blue-50 transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] flex items-center justify-center gap-3 transform hover:-translate-y-1 active:scale-95">
+                            <Download className="w-6 h-6" /> App Store
+                         </button>
+                         <button className="px-10 py-5 bg-black/40 border border-white/20 text-white rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-3 backdrop-blur-md active:scale-95 transform hover:-translate-y-1">
+                            <Download className="w-6 h-6" /> Google Play
+                         </button>
+                    </div>
+                </div>
+            </GlassCard>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/5 bg-[#050810] pt-20 pb-32 md:pb-10 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1 md:col-span-1">
+                <div className="flex items-center gap-2 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shadow-lg shadow-blue-500/20 p-1.5">
+                        <img src="/lisan.png" alt="Lisan Logo" className="w-full h-full object-contain" />
+                    </div>
+                    <span className="text-2xl font-bold text-white">Lisan<span className="text-blue-500">.</span></span>
+                </div>
+                <p className="text-slate-500 text-sm leading-relaxed mb-8">
+                    Menghubungkan dunia tanpa batas suara. Platform komunikasi inklusif untuk masa depan yang setara bagi semua.
+                </p>
+                <div className="flex gap-4">
+                    {[Twitter, Instagram, Facebook, Globe].map((Icon, i) => (
+                        <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all duration-300 active:scale-95">
+                            <Icon size={18} />
+                        </a>
+                    ))}
+                </div>
+            </div>
+            
+            {[
+                { h: "Produk", l: [
+                    { label: "Fitur Utama", href: "#fitur" },
+                    { label: "Investasi", href: "#investasi" },
+                    { label: "Untuk Sekolah", href: "/schools" },
+                    { label: "API Developer", href: "/api" }
+                ]},
+                { h: "Perusahaan", l: [
+                    { label: "Tentang Kami", href: "/about" },
+                    { label: "Karir", href: "/careers" },
+                    { label: "Blog", href: "/blog" },
+                    { label: "Kontak", href: "/contact" }
+                ]},
+                { h: "Legalitas", l: [
+                    { label: "Kebijakan Privasi", href: "/privacy" },
+                    { label: "Syarat Ketentuan", href: "/terms" },
+                    { label: "Lisensi", href: "/licenses" },
+                    { label: "Hak Cipta", href: "/copyright" }
+                ]},
+            ].map((col, i) => (
+                <div key={i}>
+                    <h4 className="font-bold text-white mb-6 tracking-wide text-lg">{col.h}</h4>
+                    <ul className="space-y-4 text-sm text-slate-500">
+                        {col.l.map((link, j) => (
+                            <li key={j}>
+                                <a href={link.href} className="hover:text-blue-400 transition-colors block hover:translate-x-1 duration-200">
+                                    {link.label}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ))}
+        </div>
+        
+        <div className="max-w-7xl mx-auto border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600 font-medium">
+            <p>© 2025 Lisan AI. All rights reserved.</p>
         </div>
       </footer>
-
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            document.addEventListener('pwa-ready', () => {
-              const b = document.getElementById('pwa-install-btn')
-              if (b) b.classList.remove('hidden')
-            })
-            document.getElementById('pwa-install-btn')?.addEventListener('click', () => {
-              document.dispatchEvent(new Event('pwa-install'))
-            })
-          `
-        }}
-      />
     </div>
   )
 }

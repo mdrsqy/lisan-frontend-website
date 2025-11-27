@@ -1,23 +1,14 @@
 import { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-inter",
-});
-
 export const metadata: Metadata = {
   title: "Lisan",
-  description:
-    "Dashboard monitoring untuk aplikasi Lisan (Belajar Bahasa Isyarat)",
-
+  description: "Aplikasi Lisan (Belajar Bahasa Isyarat)",
   icons: {
-    icon: "/lisan-logo.png",       
-    shortcut: "/lisan-logo.png",    
-    apple: "/lisan-logo.png",      
+    icon: "/lisan.png",
+    shortcut: "/lisan.png",
+    apple: "/lisan.png",
   },
 };
 
@@ -28,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <body className="font-sans antialiased bg-[#0A0F1C]">
         {children}
 
         <Toaster
