@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import api from "../lib/api";
+import api from "./api";
 
 interface User {
   id: string;
-  name: string;               // backend pakai 'name'
+  name: string;
   username: string;
   email: string;
   role: string;
@@ -17,7 +17,7 @@ interface User {
 interface AuthState {
   user: User | null;
   loading: boolean;
-  signin: (emailOrUsername: string, password: string) => Promise<void>;
+  signin: (identifier: string, password: string) => Promise<void>;
   signup: (data: {
     name: string;
     username: string;
@@ -25,103 +25,64 @@ interface AuthState {
     password: string;
     role: string;
   }) => Promise<void>;
-  signout: () => void;
+  signout: () => Promise<void>;
   setUser: (data: User) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
+  user: typeof window !== "undefined" ? JSON.parse(localStorage.getItem("user") || "null") : null,
   loading: false,
 
   setUser: (data) => set({ user: data }),
 
-  signin: async (emailOrUsername, password) => {
+  signin: async (identifier, password) => {
     set({ loading: true });
-
     try {
-      const response = await api.post("/users/signin", {
-        emailOrUsername,
-        password,
-      });
+      const r = await api.post("/api/auth/login", { identifier, password });
 
-      const rawUser = response.data?.user;
-      const token = response.data?.token;
+      const user: User = r.data.user;
+      const accessToken = r.data.accessToken;
+      const refreshToken = r.data.refreshToken;
 
-      if (!rawUser || !token) {
-        throw new Error("Data login tidak valid");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
       }
 
-      // ❗ Normalisasi user — hapus password untuk keamanan
-      const user: User = {
-        id: rawUser.id,
-        name: rawUser.name,
-        username: rawUser.username,
-        email: rawUser.email,
-        role: rawUser.role,
-        score: rawUser.score,
-        is_premium: rawUser.is_premium,
-        profile_picture: rawUser.profile_picture,
-        created_at: rawUser.created_at,
-        updated_at: rawUser.updated_at,
-      };
-
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
-
       set({ user, loading: false });
-    } catch (err: any) {
+    } catch (error) {
       set({ loading: false });
-      throw new Error(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
-          "Gagal login, periksa kembali data Anda"
-      );
+      throw error;
     }
   },
 
   signup: async (data) => {
     set({ loading: true });
-
     try {
-      const response = await api.post("/users/signup", data);
-
-      const rawUser = response.data?.user;
-      const token = response.data?.token;
-
-      if (!rawUser || !token) {
-        throw new Error("Data signup tidak valid");
-      }
-
-      const user: User = {
-        id: rawUser.id,
-        name: rawUser.name,
-        username: rawUser.username,
-        email: rawUser.email,
-        role: rawUser.role,
-        score: rawUser.score,
-        is_premium: rawUser.is_premium,
-        profile_picture: rawUser.profile_picture,
-        created_at: rawUser.created_at,
-        updated_at: rawUser.updated_at,
-      };
-
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
-
-      set({ user, loading: false });
-    } catch (err: any) {
+      await api.post("/api/auth/register", data);
       set({ loading: false });
-      throw new Error(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
-          "Gagal signup, periksa kembali data Anda"
-      );
+    } catch (error) {
+      set({ loading: false });
+      throw error;
     }
   },
 
-  signout: () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+  signout: async () => {
+    if (typeof window !== "undefined") {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      if (refreshToken) {
+        try {
+          await api.post("/api/auth/logout", { refreshToken });
+        } catch {}
+      }
+
+      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+    }
+
     set({ user: null });
   },
 }));

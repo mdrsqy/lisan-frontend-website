@@ -21,7 +21,7 @@ export default function GlobalLoader({ messages = defaultMessages }: GlobalLoade
     
     const interval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % messages.length)
-    }, 100)
+    }, 5000)
     return () => clearInterval(interval)
   }, [messages])
 
