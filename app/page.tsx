@@ -13,9 +13,13 @@ export default function LandingPage() {
   return (
     <main className="relative w-full min-h-screen bg-[#0A0F1C] text-slate-100 font-sans overflow-x-hidden">
       <Navbar />
-      <HeroSection />
 
-      <div className="relative z-10 bg-[#0A0F1C] flex flex-col w-full space-y-20 sm:space-y-32">
+      <div className="-mt-10 md:mt-0 w-full">
+        <HeroSection />
+      </div>
+
+
+      <div className="hidden md:flex relative z-10 bg-[#0A0F1C] flex-col w-full space-y-20 sm:space-y-32">
         <FeaturesSection />
         <BenefitsSection />
         <HowItWorksSection />
