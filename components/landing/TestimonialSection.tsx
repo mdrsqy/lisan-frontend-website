@@ -4,7 +4,7 @@ import { GlassCard, SectionTitle } from "@/components/landing/Section"
 
 export default function TestimonialsSection() {
   return (
-    <section id="social-proof" className="py-24 px-6 overflow-visible">
+    <section id="social-proof" className="py-20 px-6 overflow-visible">
       <div className="max-w-7xl mx-auto">
         <SectionTitle title="Dipercaya oleh Komunitas." subtitle="TESTIMONI" emoji="💙" />
 

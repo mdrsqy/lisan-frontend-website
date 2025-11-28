@@ -5,7 +5,7 @@ import { GlassCard, SectionTitle } from "@/components/landing/Section"
 
 export default function PricingSection() {
   return (
-    <section id="investasi" className="py-24 px-6 overflow-visible relative z-20">
+    <section id="investasi" className="py-20 px-6 overflow-visible relative z-20">
       <div className="max-w-5xl mx-auto relative z-20">
         <SectionTitle title="Investasi Cerdas untuk Masa Depan Inklusif." subtitle="INVESTASI" emoji="💳" />
 

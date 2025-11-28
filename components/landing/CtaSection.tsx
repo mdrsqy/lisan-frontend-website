@@ -1,7 +1,6 @@
 'use client'
 
 import React from "react"
-import { Apple } from "lucide-react"
 import { Boxes } from "@/components/ui/background-boxes"
 import { cn } from "@/lib/utils"
 
@@ -11,8 +10,13 @@ const StoreBadge = ({ type, onClick }: { type: 'apple' | 'google', onClick?: () 
     className="relative group flex items-center gap-3 px-5 py-2.5 rounded-xl bg-white/[0.05] border border-white/10 backdrop-blur-xl hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 w-full sm:w-auto justify-center sm:justify-start overflow-hidden z-40"
   >
     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
     {type === 'apple' ? (
-      <Apple className="w-8 h-8 fill-white" />
+      <img
+        src="/apple.svg"
+        alt="Apple Store"
+        className="w-8 h-8"
+      />
     ) : (
       <img
         src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Google_Play_Arrow_logo.svg"
@@ -20,6 +24,7 @@ const StoreBadge = ({ type, onClick }: { type: 'apple' | 'google', onClick?: () 
         className="w-7 h-7"
       />
     )}
+
     <div className="flex flex-col items-start text-white relative z-40">
       <span className="text-[10px] font-medium opacity-60 uppercase tracking-wide leading-none mb-1">
         {type === 'apple' ? 'Download on the' : 'Get it on'}
@@ -33,7 +38,7 @@ const StoreBadge = ({ type, onClick }: { type: 'apple' | 'google', onClick?: () 
 
 export default function CtaSection() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#0A0F1C] py-32 flex flex-col items-center justify-center rounded-3xl mx-auto my-20 max-w-7xl border border-white/10">
+    <section className="relative w-full overflow-hidden bg-[#0A0F1C] py-32 flex flex-col items-center justify-center rounded-3xl mx-auto mt-10 mb-20 max-w-7xl border border-white/10">
 
       <div className="absolute inset-0 w-full h-full bg-[#0A0F1C] z-0 [mask-image:radial-gradient(transparent,white)] pointer-events-none" />
 

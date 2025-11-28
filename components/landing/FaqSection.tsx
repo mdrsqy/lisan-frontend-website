@@ -9,7 +9,7 @@ export default function FaqSection() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   return (
-    <section id="faq" className="relative z-40 py-24 px-6 max-w-3xl mx-auto">
+    <section id="faq" className="relative z-40 mt-10 mb-10 px-6 max-w-3xl mx-auto">
       <SectionTitle title="Pertanyaan yang Sering Diajukan." subtitle="FAQ" emoji="🤔" />
 
       <div className="space-y-4">

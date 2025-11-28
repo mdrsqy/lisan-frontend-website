@@ -1,13 +1,19 @@
 "use client"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 export const Boxes = ({ className, ...rest }: { className?: string }) => {
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 640
+  const [rows, setRows] = useState(new Array(150).fill(1))
+  const [cols, setCols] = useState(new Array(100).fill(1))
 
-  const rows = new Array(isMobile ? 50 : 150).fill(1)
-  const cols = new Array(isMobile ? 30 : 100).fill(1)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isMobile = window.innerWidth < 640
+      setRows(new Array(isMobile ? 50 : 150).fill(1))
+      setCols(new Array(isMobile ? 30 : 100).fill(1))
+    }
+  }, [])
 
   const colors = [
     "#7dd3fc",
@@ -32,7 +38,7 @@ export const Boxes = ({ className, ...rest }: { className?: string }) => {
       }}
       className={cn(
         "absolute left-1/4 p-4 -top-1/4 flex -translate-x-1/2 -translate-y-1/2 w-full h-full z-0",
-        "pointer-events-auto sm:pointer-events-none",
+        "pointer-events-none",
         "scale-[0.28] sm:scale-[0.45] md:scale-[0.675]",
         className
       )}
@@ -41,7 +47,7 @@ export const Boxes = ({ className, ...rest }: { className?: string }) => {
       {rows.map((_, i) => (
         <motion.div
           key={`row` + i}
-          className="w-16 h-8 border-l border-white/10 relative"
+          className="w-16 h-8 border-l border-white/1 relative"
         >
           {cols.map((_, j) => (
             <motion.div
@@ -51,9 +57,10 @@ export const Boxes = ({ className, ...rest }: { className?: string }) => {
               }}
               animate={{
                 transition: { duration: 2 },
+                backgroundColor: "transparent",
               }}
               key={`col` + j}
-              className="w-16 h-8 border-r border-t border-white/10 relative"
+              className="w-16 h-8 border-r border-t border-white/10 relative pointer-events-auto"
             >
               {j % 2 === 0 && i % 2 === 0 ? (
                 <svg
@@ -62,7 +69,7 @@ export const Boxes = ({ className, ...rest }: { className?: string }) => {
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
                   stroke="currentColor"
-                  className="absolute h-6 w-10 -top-[14px] -left-[22px] text-white/10 stroke-[1px] pointer-events-none"
+                  className="absolute h-6 w-10 -top-[14px] -left-[22px] text-white/1 stroke-[1px] pointer-events-none"
                 >
                   <path
                     strokeLinecap="round"

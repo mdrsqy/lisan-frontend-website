@@ -4,7 +4,7 @@ import { GlassCard, SectionTitle } from "@/components/landing/Section"
 
 export default function FeaturesSection() {
   return (
-    <section id="fitur" className="py-24 px-6 relative z-10">
+    <section id="fitur" className="py-10 px-6 relative z-10">
       <div className="max-w-7xl mx-auto">
         <SectionTitle title="Inovasi Teknologi Inklusif." subtitle="FITUR UTAMA" emoji="⚡️" />
 

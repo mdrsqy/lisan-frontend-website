@@ -4,7 +4,7 @@ import { GlassCard, SectionTitle } from "@/components/landing/Section"
 
 export default function HowItWorksSection() {
   return (
-    <section id="cara-kerja" className="py-24 px-6">
+    <section id="cara-kerja" className="py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <SectionTitle title="Mulai dalam Hitungan Detik." subtitle="CARA KERJA" emoji="⚙️" />
 
