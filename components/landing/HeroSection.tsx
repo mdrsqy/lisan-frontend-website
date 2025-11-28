@@ -3,7 +3,7 @@
 import React from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowRight, PlayCircle, Apple } from "lucide-react"
+import { ArrowRight, PlayCircle } from "lucide-react"
 import { SparklesCore } from "@/components/ui/sparkle"
 
 const StoreBadge = ({ type, onClick }: { type: 'apple' | 'google', onClick?: () => void }) => (
@@ -12,8 +12,13 @@ const StoreBadge = ({ type, onClick }: { type: 'apple' | 'google', onClick?: () 
     className="relative group flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-white/[0.08] border border-white/10 backdrop-blur-xl hover:bg-white/15 hover:border-white/25 transition-all active:scale-95 w-full overflow-hidden z-20 shadow-lg shadow-black/20"
   >
     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
     {type === 'apple' ? (
-      <Apple className="w-6 h-6 sm:w-8 sm:h-8 fill-white" />
+      <img
+        src="/apple.svg"
+        alt="App Store"
+        className="w-6 h-6 sm:w-8 sm:h-8"
+      />
     ) : (
       <img
         src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Google_Play_Arrow_logo.svg"
@@ -21,6 +26,7 @@ const StoreBadge = ({ type, onClick }: { type: 'apple' | 'google', onClick?: () 
         className="w-5 h-5 sm:w-7 sm:h-7"
       />
     )}
+
     <div className="flex flex-col items-start text-white relative z-10">
       <span className="text-[10px] font-medium opacity-60 uppercase tracking-wide leading-none mb-1">
         {type === 'apple' ? 'Download on the' : 'Get it on'}
@@ -108,7 +114,7 @@ export default function HeroSection() {
             </button>
           </div>
 
-          {/* Mobile Actions (Store Badges) */}
+          {/* Mobile Actions */}
           <div className="flex md:hidden flex-col gap-4 max-w-sm mx-auto mt-6 relative z-20 px-2">
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <StoreBadge type="google" onClick={handleDownload} />
@@ -124,8 +130,8 @@ export default function HeroSection() {
               { val: "<0.5s", label: "Latensi" },
               { val: "2 Arah", label: "Komunikasi" }
             ].map((stat, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="bg-white/[0.03] border border-white/5 md:bg-transparent md:border-transparent md:hover:bg-white/5 md:hover:border-white/5 p-4 rounded-xl md:rounded-2xl transition-all cursor-default flex flex-col items-center justify-center backdrop-blur-sm"
               >
                 <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.val}</div>
@@ -133,6 +139,7 @@ export default function HeroSection() {
               </div>
             ))}
           </div>
+
         </motion.div>
       </div>
     </section>
