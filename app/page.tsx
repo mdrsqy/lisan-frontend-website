@@ -44,7 +44,7 @@ const GlassCard = ({ children, className = "", hoverEffect = false }: { children
 )
 
 const StoreBadge = ({ type, onClick }: { type: 'apple' | 'google', onClick?: () => void }) => (
-  <button 
+  <button
     onClick={onClick}
     className="relative group flex items-center gap-3 px-5 py-2.5 rounded-xl bg-white/[0.05] border border-white/10 backdrop-blur-xl hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 w-full sm:w-auto justify-center sm:justify-start overflow-hidden"
   >
@@ -211,7 +211,7 @@ export default function LandingPage() {
             <div className="flex md:hidden flex-col gap-4 max-w-sm mx-auto mt-8">
               <div className="grid grid-cols-1 gap-3">
                 <StoreBadge type="google" onClick={handleDownload} />
-                <StoreBadge type="apple" onClick={() => {}} />
+                <StoreBadge type="apple" onClick={() => { }} />
               </div>
             </div>
 
@@ -447,11 +447,11 @@ export default function LandingPage() {
 
         <section className="py-24 px-6 relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-screen">
-            <div className="absolute top-50 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px]">
+            <div className="absolute top-50 left-1/2 -translate-x-1/2 w-[10000px] h-[100000px]">
               <DotLottieReact
                 src="https://lottie.host/15a13e42-201c-4c0e-bff5-2d1743eb8db4/mh2ui6OOID.lottie"
-                loop
                 autoplay
+                loop
               />
             </div>
           </div>
@@ -470,8 +470,8 @@ export default function LandingPage() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row justify-center gap-4 w-full sm:w-auto">
-                  <StoreBadge type="apple" onClick={() => {}} />
-                  <StoreBadge type="google" onClick={() => {}} />
+                  <StoreBadge type="apple" onClick={() => { }} />
+                  <StoreBadge type="google" onClick={() => { }} />
                 </div>
               </div>
             </GlassCard>
