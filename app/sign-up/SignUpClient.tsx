@@ -1,31 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
-
-const useRouter = () => {
-  return {
-    push: (path: string) => console.log(`Navigating to: ${path}`),
-  };
-};
-
-const useAuthStore = () => {
-  const [loading, setLoading] = useState(false);
-
-  const signup = async (data: any) => {
-    console.log("Signup Data:", data);
-    setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setLoading(false);
-  };
-
-  const sendCode = async (email: string) => {
-    console.log("Sending OTP to:", email);
-  };
-
-  return { signup, sendCode, loading };
-};
+import { useAuthStore } from "../../lib/authStore";
+import Notification from "../../components/Notification";
 
 const HoverBorderGradient = ({
   children,
@@ -85,14 +65,37 @@ export default function SignUpClient() {
   const role = "user";
   const [showPassword, setShowPassword] = useState(false);
 
-  const { signup, sendCode, loading: storeLoading } = useAuthStore();
+  const { signup, loading: storeLoading } = useAuthStore();
+
   const router = useRouter();
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
 
+  const [errors, setErrors] = useState({
+    name: false,
+    username: false,
+    email: false,
+    password: false,
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newErrors = {
+      name: !name.trim(),
+      username: !username.trim(),
+      email: !email.trim(),
+      password: !password.trim(),
+    };
+    setErrors(newErrors);
+
+    const hasError = Object.values(newErrors).some((v) => v === true);
     
-    if (!name.trim() || !username.trim() || !email.trim() || !password.trim()) {
+    if (hasError) {
+      window.dispatchEvent(
+        new CustomEvent("notify", {
+          detail: { type: "warning", message: "Mohon lengkapi semua kolom yang bertanda merah." },
+        })
+      );
       return;
     }
 
@@ -100,17 +103,15 @@ export default function SignUpClient() {
 
     try {
       await signup({ name, username, email, password, role });
-      
+
       if (typeof window !== "undefined") {
         localStorage.setItem("temp_email", email);
       }
 
-      await sendCode(email);
-      
       setTimeout(() => {
         router.push(`/verify-code`);
         setIsLoadingLocal(false);
-      }, 2000);
+      }, 1500);
 
     } catch (err: any) {
       console.error(err);
@@ -123,18 +124,20 @@ export default function SignUpClient() {
     setIsLoadingLocal(true);
     setTimeout(() => {
       router.push("/sign-in");
-    }, 1000);
+    }, 500);
   };
 
   const isGlobalLoading = storeLoading || isLoadingLocal;
 
   return (
     <div className="relative min-h-screen bg-[#020617] text-slate-100 font-sans flex items-center justify-center py-10 overflow-hidden">
+      
+      <Notification />
 
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 mix-blend-overlay pointer-events-none"></div>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none"></div>
-        
+
         <motion.div
           animate={{
             x: [0, 100, 0],
@@ -180,22 +183,28 @@ export default function SignUpClient() {
 
       <div className="fixed bottom-8 left-8 z-[50]">
         <HoverBorderGradient
-            containerClassName="rounded-full"
-            as="button"
-            onClick={() => router.push('/')}
-            className="text-white"
+          containerClassName="rounded-full"
+          as="button"
+          onClick={() => router.push('/')}
+          className="text-white"
         >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">Kembali</span>
+          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Kembali</span>
         </HoverBorderGradient>
       </div>
 
       <div className="w-full max-w-2xl px-6 relative z-10">
         <GlassCard className="p-8 md:p-12 rounded-[2rem]">
-          
           <div className="mb-10 flex flex-col items-center text-center">
             <div className="relative w-24 h-24 flex items-center justify-center mb-6">
-                <img src="/lisan.png" alt="Lisan Logo" className="w-full h-full object-contain drop-shadow-xl" />
+              <img
+                src="/lisan.png"
+                alt="Lisan Logo"
+                className="w-full h-full object-contain drop-shadow-xl"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/150?text=Lisan";
+                }}
+              />
             </div>
 
             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Buat Akun Baru</h1>
@@ -209,53 +218,94 @@ export default function SignUpClient() {
 
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2 pl-1">Nama Lengkap</label>
+                  <label className={`block text-sm font-medium mb-2 pl-1 transition-colors ${errors.name ? "text-red-400" : "text-slate-300"}`}>Nama Lengkap {errors.name && "*"}</label>
                   <input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (errors.name) setErrors(prev => ({ ...prev, name: false }));
+                    }}
                     placeholder="Nama Anda"
                     disabled={isGlobalLoading}
-                    className="w-full px-5 py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:border-blue-500/50 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 disabled:opacity-50"
+                    className={`w-full px-5 py-4 rounded-xl bg-white/5 border text-white placeholder-slate-500 outline-none transition-all duration-200 disabled:opacity-50
+                  ${errors.name
+                        ? "border-red-500 focus:border-red-500 focus:bg-red-500/10 focus:ring-4 focus:ring-red-500/10 animate-pulse-once"
+                        : "border-white/10 focus:border-blue-500/50 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10"
+                      }
+                `}
                   />
+                  {errors.name && (
+                    <p className="text-red-400 text-xs mt-1 pl-1">Nama wajib diisi</p>
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2 pl-1">Username</label>
+                  <label className={`block text-sm font-medium mb-2 pl-1 transition-colors ${errors.username ? "text-red-400" : "text-slate-300"}`}>Username {errors.username && "*"}</label>
                   <input
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      if (errors.username) setErrors(prev => ({ ...prev, username: false }));
+                    }}
                     placeholder="Username"
                     disabled={isGlobalLoading}
-                    className="w-full px-5 py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:border-blue-500/50 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 disabled:opacity-50"
+                    className={`w-full px-5 py-4 rounded-xl bg-white/5 border text-white placeholder-slate-500 outline-none transition-all duration-200 disabled:opacity-50
+                  ${errors.username
+                        ? "border-red-500 focus:border-red-500 focus:bg-red-500/10 focus:ring-4 focus:ring-red-500/10 animate-pulse-once"
+                        : "border-white/10 focus:border-blue-500/50 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10"
+                      }
+                `}
                   />
+                  {errors.username && (
+                    <p className="text-red-400 text-xs mt-1 pl-1">Username wajib diisi</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2 pl-1">Email</label>
+                  <label className={`block text-sm font-medium mb-2 pl-1 transition-colors ${errors.email ? "text-red-400" : "text-slate-300"}`}>Email {errors.email && "*"}</label>
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errors.email) setErrors(prev => ({ ...prev, email: false }));
+                    }}
                     placeholder="email@example.com"
                     disabled={isGlobalLoading}
-                    className="w-full px-5 py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:border-blue-500/50 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 disabled:opacity-50"
+                    className={`w-full px-5 py-4 rounded-xl bg-white/5 border text-white placeholder-slate-500 outline-none transition-all duration-200 disabled:opacity-50
+                  ${errors.email
+                        ? "border-red-500 focus:border-red-500 focus:bg-red-500/10 focus:ring-4 focus:ring-red-500/10 animate-pulse-once"
+                        : "border-white/10 focus:border-blue-500/50 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10"
+                      }
+                `}
                   />
+                  {errors.email && (
+                    <p className="text-red-400 text-xs mt-1 pl-1">Email wajib diisi</p>
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2 pl-1">Kata Sandi</label>
+                  <label className={`block text-sm font-medium mb-2 pl-1 transition-colors ${errors.password ? "text-red-400" : "text-slate-300"}`}>Kata Sandi {errors.password && "*"}</label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (errors.password) setErrors(prev => ({ ...prev, password: false }));
+                      }}
                       placeholder="••••••••"
                       disabled={isGlobalLoading}
-                      className="w-full px-5 py-4 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:border-blue-500/50 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-200 disabled:opacity-50"
+                      className={`w-full px-5 py-4 rounded-xl bg-white/5 border text-white placeholder-slate-500 outline-none transition-all duration-200 disabled:opacity-50
+                  ${errors.password
+                          ? "border-red-500 focus:border-red-500 focus:bg-red-500/10 focus:ring-4 focus:ring-red-500/10 animate-pulse-once"
+                          : "border-white/10 focus:border-blue-500/50 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10"
+                        }
+                `}
                     />
 
                     <button
@@ -267,6 +317,10 @@ export default function SignUpClient() {
                       {showPassword ? <EyeOff size={20} strokeWidth={1.5} /> : <Eye size={20} strokeWidth={1.5} />}
                     </button>
                   </div>
+
+                  {errors.password && (
+                    <p className="text-red-400 text-xs mt-1 pl-1">Kata sandi wajib diisi</p>
+                  )}
                 </div>
               </div>
 

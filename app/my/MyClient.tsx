@@ -6,7 +6,6 @@ import { useAuthStore } from "@/lib/authStore";
 import { LayoutDashboard, Activity, Users, TrendingUp, AlertCircle, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import GlobalLoader from "@/components/GlobalLoader";
 import MenuBar from "@/components/MenuBar";
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -157,9 +156,6 @@ export default function MyClient() {
 
   return (
     <div className="min-h-screen bg-[#0A0F1C] text-slate-100 font-sans selection:bg-blue-500/30 selection:text-blue-100 flex flex-col md:flex-row overflow-hidden">
-      <AnimatePresence>
-        {isLoading && <GlobalLoader />}
-      </AnimatePresence>
 
       <MenuBar role={userRole} userName={userName} userRoleLabel={userRoleLabel} />
 

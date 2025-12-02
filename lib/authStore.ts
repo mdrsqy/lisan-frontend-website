@@ -6,12 +6,14 @@ interface User {
   name: string;
   username: string;
   email: string;
-  role: string;
-  score?: number;
-  is_premium?: boolean;
+  bio?: string;
   profile_picture?: string | null;
+  role: string;
+  is_premium?: boolean;
+  is_verified?: boolean;
+  score?: number;
   created_at?: string;
-  updated_at?: string;
+  deleted_at?: string | null;
 }
 
 interface AuthState {
@@ -24,11 +26,11 @@ interface AuthState {
     email: string;
     password: string;
     role: string;
-  }) => Promise<void>;
+  }) => Promise<string>;
   sendCode: (email: string) => Promise<void>;
-  verifyCode: (email: string, otp: string) => Promise<void>;
-  forgotPassword: (email: string) => Promise<void>;
-  resetPassword: (token: string, newPassword: string) => Promise<void>;
+  verifyCode: (user_id: string, otp: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<string>;
+  resetPassword: (user_id: string, otp: string, newPassword: string) => Promise<void>;
   refreshToken: () => Promise<void>;
   signout: () => Promise<void>;
   setUser: (data: User) => void;
@@ -81,14 +83,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   signup: async (data) => {
     set({ loading: true });
     try {
-      await api.post("/api/auth/register", data);
-
+      const r = await api.post("/api/auth/register", data);
+      
       set({ loading: false });
       window.dispatchEvent(
         new CustomEvent("notify", {
-          detail: { type: "success", message: "Registrasi berhasil" },
+          detail: { type: "success", message: "Registrasi berhasil, silakan verifikasi OTP" },
         })
       );
+      return r.data.user_id;
     } catch (error: any) {
       set({ loading: false });
       window.dispatchEvent(
@@ -128,15 +131,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  verifyCode: async (email, otp) => {
+  verifyCode: async (user_id, otp) => {
     set({ loading: true });
     try {
-      await api.post("/api/auth/verify-otp", { email, otp });
+      await api.post("/api/auth/verify-otp", { user_id, otp });
 
       set({ loading: false });
       window.dispatchEvent(
         new CustomEvent("notify", {
-          detail: { type: "success", message: "OTP berhasil diverifikasi" },
+          detail: { type: "success", message: "Akun berhasil diverifikasi" },
         })
       );
     } catch (error: any) {
@@ -145,7 +148,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         new CustomEvent("notify", {
           detail: {
             type: "error",
-            message: error?.response?.data?.message || "OTP salah",
+            message: error?.response?.data?.message || "OTP salah atau kadaluarsa",
           },
         })
       );
@@ -156,21 +159,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   forgotPassword: async (email) => {
     set({ loading: true });
     try {
-      await api.post("/api/auth/forgot-password", { email });
+      const r = await api.post("/api/auth/forgot-password", { email });
 
       set({ loading: false });
       window.dispatchEvent(
         new CustomEvent("notify", {
-          detail: { type: "success", message: "Email reset dikirim" },
+          detail: { type: "success", message: "OTP reset password dikirim" },
         })
       );
+      return r.data.user_id;
     } catch (error: any) {
       set({ loading: false });
       window.dispatchEvent(
         new CustomEvent("notify", {
           detail: {
             type: "error",
-            message: error?.response?.data?.message || "Gagal mengirim email",
+            message: error?.response?.data?.message || "Gagal mengirim OTP",
           },
         })
       );
@@ -178,18 +182,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  resetPassword: async (token, newPassword) => {
+  resetPassword: async (user_id, otp, newPassword) => {
     set({ loading: true });
     try {
       await api.post("/api/auth/reset-password", {
-        token,
-        newPassword,
+        user_id,
+        otp,
+        new_password: newPassword,
       });
 
       set({ loading: false });
       window.dispatchEvent(
         new CustomEvent("notify", {
-          detail: { type: "success", message: "Password berhasil direset" },
+          detail: { type: "success", message: "Password berhasil diubah" },
         })
       );
     } catch (error: any) {
@@ -198,7 +203,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         new CustomEvent("notify", {
           detail: {
             type: "error",
-            message: error?.response?.data?.message || "Reset gagal",
+            message: error?.response?.data?.message || "Reset password gagal",
           },
         })
       );
@@ -215,7 +220,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       const newAccessToken = r.data.accessToken;
 
       localStorage.setItem("accessToken", newAccessToken);
-    } catch {}
+    } catch (error) {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if(refreshToken) {
+         await api.post("/api/auth/logout", { refreshToken });
+      }
+      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      set({ user: null });
+    }
   },
 
   signout: async () => {
