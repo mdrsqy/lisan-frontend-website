@@ -18,13 +18,13 @@ import Link from "next/link";
 import { useAuthStore } from "../lib/authStore";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Interface MenuItem tanpa properti badge
 interface MenuItem {
   name: string;
   href?: string;
   icon: any;
   action?: () => void;
   isDanger?: boolean;
-  badge?: string | number;
 }
 
 export function Sidebar({ activeTab }: { activeTab: string }) {
@@ -36,6 +36,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   useEffect(() => {
     setMounted(true);
+    // Logika sinkronisasi user dipertahankan
     if (!user) {
       const savedUser = localStorage.getItem("user");
       if (savedUser) setUser(JSON.parse(savedUser));
@@ -44,6 +45,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
     }
   }, [user, setUser]);
 
+  // Handle click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -56,12 +58,13 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   if (!mounted) return null;
 
+  // Hapus badge dari menu item
   const mainMenu: MenuItem[] = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { name: "Users Management", href: "/admin/user-management", icon: Users, badge: "New" },
+    { name: "Users Management", href: "/admin/user-management", icon: Users },
     { name: "Announcements", href: "/admin/announcement-management", icon: Megaphone },
     { name: "Learning Modules", href: "/admin/module-managements", icon: BookOpen },
-    { name: "Notifications", href: "/admin/notifications", icon: Bell, badge: 3 },
+    { name: "Notifications", href: "/admin/notifications", icon: Bell },
   ];
 
   const profileMenu: MenuItem[] = [
@@ -76,31 +79,32 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
         initial={{ x: -300, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "circOut" }}
-        className="fixed left-0 top-0 h-screen w-80 z-40 flex flex-col justify-between border-r border-white/10 bg-[#050b14]/60 backdrop-blur-2xl shadow-[10px_0_30px_-10px_rgba(0,0,0,0.5)]"
+        // Glassmorphism yang lebih kuat
+        className="fixed left-0 top-0 h-screen w-80 z-40 flex flex-col justify-between border-r border-white/10 bg-[#050b14]/50 backdrop-blur-[35px] shadow-[10px_0_50px_-10px_rgba(0,0,0,0.6)]"
       >
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-0 mix-blend-overlay"></div>
-        
-        <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute top-1/2 -right-20 w-40 h-40 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+        {/* Efek noise dan blob dipertahankan untuk kedalaman */}
+        <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-0 mix-blend-overlay"></div>
+        <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute top-1/2 -right-20 w-40 h-40 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col h-full">
           
+          {/* Logo Section */}
           <div className="px-6 pt-10 pb-8">
             <Link href="/admin/dashboard" className="group flex items-center gap-4">
-              <div className="relative w-12 h-12 flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-indigo-700/20 rounded-2xl shadow-[0_0_20px_-5px_rgba(79,70,229,0.3)] group-hover:shadow-[0_0_25px_-5px_rgba(79,70,229,0.5)] transition-all duration-300 group-hover:scale-105 border border-white/10 backdrop-blur-sm overflow-hidden p-2">
+              <div className="relative w-12 h-12 flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-xl shadow-[0_0_20px_-5px_rgba(79,70,229,0.3)] group-hover:shadow-[0_0_25px_-5px_rgba(79,70,229,0.5)] transition-all duration-300 group-hover:scale-105 border border-white/15 backdrop-blur-sm overflow-hidden p-2">
                 <img 
                   src="/lisan.png" 
                   alt="Lisan Logo" 
                   className="w-full h-full object-contain drop-shadow-md"
                 />
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-tight group-hover:to-white transition-all duration-300">
+                <h1 className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-wider group-hover:to-white transition-all duration-300">
                   Lisan Admin
                 </h1>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50 animate-pulse"></div>
                   <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold group-hover:text-slate-400 transition-colors">
                     Control Panel
                   </p>
@@ -109,11 +113,12 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             </Link>
           </div>
 
+          {/* Main Menu */}
           <div className="flex-1 px-4 py-2 overflow-y-auto custom-scrollbar space-y-8">
             <div>
               <p className="px-4 text-xs font-bold text-slate-500/80 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <Sparkles className="w-3 h-3 text-blue-500/50" />
-                Main Menu
+                <Sparkles className="w-3 h-3 text-blue-400/50" />
+                Menu Utama
               </p>
               <nav className="space-y-1.5">
                 {mainMenu.map((item) => {
@@ -122,11 +127,12 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
                   return (
                     <Link key={item.name} href={item.href || "#"}>
-                      <div className="group relative flex items-center gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-300">
+                      <div className="group relative flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300">
                         {isActive && (
                           <motion.div
                             layoutId="active-nav-bg"
-                            className="absolute inset-0 bg-gradient-to-r from-blue-600/15 to-indigo-600/5 border border-blue-500/20 rounded-xl shadow-[0_0_15px_-3px_rgba(59,130,246,0.2)]"
+                            // Efek aktif lebih glass
+                            className="absolute inset-0 bg-blue-700/15 border border-blue-500/20 rounded-xl shadow-[0_0_20px_-5px_rgba(59,130,246,0.3)]"
                             transition={{ type: "spring", stiffness: 350, damping: 25 }}
                           />
                         )}
@@ -139,13 +145,8 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                           {item.name}
                         </span>
 
-                        {item.badge && (
-                          <div className={`ml-auto relative z-10 px-2 py-0.5 rounded-full text-[10px] font-bold border ${isActive ? "bg-blue-500/20 border-blue-400/30 text-blue-200" : "bg-white/10 border-white/10 text-slate-300"}`}>
-                            {item.badge}
-                          </div>
-                        )}
-
-                        {!item.badge && isActive && (
+                        {/* Chevron Indicator hanya untuk tab aktif dan tanpa badge */}
+                        {isActive && (
                           <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -162,18 +163,19 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             </div>
           </div>
 
-          <div className="p-4 bg-gradient-to-t from-[#050b14]/90 to-transparent">
+          {/* Profile Section */}
+          <div className="p-4 bg-gradient-to-t from-[#050b14]/80 to-transparent">
             <div ref={profileRef} className="relative">
               <div 
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className={`group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-md ${
+                className={`group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-xl ${
                   showProfileMenu 
-                    ? "bg-white/10 border-white/10 shadow-lg shadow-black/20" 
-                    : "bg-white/5 border-transparent hover:bg-white/10 hover:border-white/5"
+                    ? "bg-white/10 border-white/20 shadow-xl shadow-black/30" 
+                    : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10"
                 }`}
               >
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
+                  <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30">
                     <div className="w-full h-full rounded-full bg-[#0A0F1C] flex items-center justify-center overflow-hidden relative">
                       {user?.profile_picture ? (
                         <img src={user.profile_picture} alt="Profile" className="w-full h-full object-cover" />
@@ -188,7 +190,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
+                  <p className="text-sm font-semibold text-white truncate group-hover:text-blue-300 transition-colors">
                     {user?.name || "Admin User"}
                   </p>
                   <p className="text-[11px] text-slate-400 truncate group-hover:text-slate-300 transition-colors">
@@ -208,7 +210,8 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                     animate={{ opacity: 1, y: -12, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.9 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="absolute bottom-full left-0 w-full bg-[#0f1623]/90 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.6)] overflow-hidden z-50 p-1.5"
+                    // Menu Profile lebih glass
+                    className="absolute bottom-full left-0 w-full bg-[#0f1623]/80 backdrop-blur-[40px] border border-white/15 rounded-2xl shadow-[0_0_50px_-10px_rgba(0,0,0,0.8)] overflow-hidden z-50 p-1.5"
                   >
                     <div className="space-y-1">
                       {profileMenu.map((item) => (
@@ -243,6 +246,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
         </div>
       </motion.aside>
 
+      {/* Logout Modal */}
       <AnimatePresence>
         {showLogoutModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -251,7 +255,8 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowLogoutModal(false)}
-              className="absolute inset-0 bg-[#050b14]/80 backdrop-blur-sm"
+              // Backdrop lebih gelap dan blur
+              className="absolute inset-0 bg-[#050b14]/90 backdrop-blur-md"
             />
             
             <motion.div
@@ -259,11 +264,12 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: "spring", stiffness: 350, damping: 25 }}
-              className="relative w-full max-w-sm bg-[#0e1420]/90 border border-white/10 rounded-[32px] p-8 shadow-[0_0_50px_-10px_rgba(0,0,0,0.7)] overflow-hidden backdrop-blur-2xl"
+              // Modal lebih glass
+              className="relative w-full max-w-sm bg-[#0e1420]/70 border border-white/10 rounded-[32px] p-8 shadow-[0_0_80px_-10px_rgba(0,0,0,0.9)] overflow-hidden backdrop-blur-[50px]"
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-orange-500 to-red-500 opacity-70"></div>
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-red-500/20 rounded-full blur-[60px] pointer-events-none"></div>
-              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-500/10 rounded-full blur-[60px] pointer-events-none"></div>
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-red-500/15 rounded-full blur-[80px] pointer-events-none"></div>
+              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-500/10 rounded-full blur-[80px] pointer-events-none"></div>
 
               <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/10 to-orange-500/5 border border-red-500/10 flex items-center justify-center mb-6 shadow-[0_0_30px_-10px_rgba(239,68,68,0.3)]">
@@ -278,7 +284,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                 <div className="flex w-full gap-3">
                   <button
                     onClick={() => setShowLogoutModal(false)}
-                    className="flex-1 px-4 py-3.5 rounded-2xl border border-white/10 text-slate-300 font-medium hover:bg-white/5 hover:text-white transition-all duration-200"
+                    className="flex-1 px-4 py-3.5 rounded-2xl border border-white/20 text-slate-300 font-medium bg-white/5 hover:bg-white/10 hover:text-white transition-all duration-200"
                   >
                     Batal
                   </button>
