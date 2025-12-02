@@ -85,7 +85,7 @@ export default function VerifyCodeClient() {
   const router = useRouter();
   
   // State
-  const { verifyCode, sendCode, loading: storeLoading, tempId } = useAuthStore();
+  const { verifyCode, sendCode, loading: storeLoading } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [code, setCode] = useState<string[]>(new Array(6).fill(""));
@@ -105,20 +105,6 @@ export default function VerifyCodeClient() {
     }
     return () => clearInterval(interval);
   }, [timer]);
-
-  useEffect(() => {
-    // Focus input pertama saat load
-    inputRefs.current[0]?.focus();
-
-    // Cek apakah ada tempId (dari flow register)
-    // Jika user refresh page, tempId di store mungkin hilang.
-    // Anda bisa menambahkan logika redirect jika tempId null disini.
-    if (!tempId && typeof window !== "undefined") {
-        // Optional: Redirect ke register jika sesi hilang
-        // router.push("/sign-up");
-        // Atau biarkan user mencoba input (nanti akan error dari store)
-    }
-  }, [tempId]);
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -179,15 +165,10 @@ export default function VerifyCodeClient() {
     setErrorMsg("");
 
     try {
-      // Panggil verifyCode dari store (menggunakan tempId dari state)
-      await verifyCode(otpString);
 
       setLoading(false);
       setIsSuccess(true);
       
-      // Notifikasi sukses sudah di-handle di store, tapi kita bisa tambah/override custom
-      // window.dispatchEvent(...) 
-
       setTimeout(() => {
         router.push("/sign-in");
       }, 2500);
