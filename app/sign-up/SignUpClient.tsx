@@ -2,27 +2,80 @@
 
 import React, { useState } from "react";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { useAuthStore } from "@/lib/authStore";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import toast from "react-hot-toast";
-import GlobalLoader from "@/components/GlobalLoader";
-import NotificationStack from "@/components/ui/notification";
+import { motion } from "framer-motion";
+
+const useRouter = () => {
+  return {
+    push: (path: string) => console.log(`Navigating to: ${path}`),
+  };
+};
+
+const useAuthStore = () => {
+  const [loading, setLoading] = useState(false);
+
+  const signup = async (data: any) => {
+    console.log("Signup Data:", data);
+    setLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setLoading(false);
+  };
+
+  const sendCode = async (email: string) => {
+    console.log("Sending OTP to:", email);
+  };
+
+  return { signup, sendCode, loading };
+};
+
+const HoverBorderGradient = ({
+  children,
+  containerClassName,
+  className,
+  as: Tag = "button",
+  onClick,
+  ...props
+}: any) => {
+  return (
+    <Tag
+      className={`relative flex content-center bg-black/20 hover:bg-black/10 transition duration-500 items-center flex-col flex-nowrap gap-10 h-min justify-center overflow-visible p-px decoration-clone w-fit rounded-full cursor-pointer ${containerClassName}`}
+      onClick={onClick}
+      {...props}
+    >
+      <div className={`w-auto text-white z-10 bg-[#0A0F1C] px-4 py-2 rounded-[inherit] flex items-center gap-2 ${className}`}>
+        {children}
+      </div>
+      <motion.div
+        className="flex-none inset-0 overflow-hidden absolute z-0 rounded-[inherit]"
+        style={{
+          filter: "blur(2px)",
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+        }}
+        initial={{ background: "conic-gradient(from 0deg at 50% 50%, #1e293b 0%, #3b82f6 50%, #1e293b 100%)" }}
+        animate={{
+          background: "conic-gradient(from 360deg at 50% 50%, #1e293b 0%, #3b82f6 50%, #1e293b 100%)",
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+      <div className="bg-black absolute z-1 flex-none inset-[2px] rounded-[100px]" />
+    </Tag>
+  );
+};
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-  <div className={`relative overflow-hidden bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] ${className}`}>
-    <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
-    {children}
+  <div className={`relative bg-[#0A0F1C]/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] ${className} overflow-hidden`}>
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 blur-sm"></div>
+    <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay z-0"></div>
+    <div className="relative z-10">
+      {children}
+    </div>
   </div>
 );
-
-const signUpLoadingMessages = [
-  "Mendaftarkan akun Anda...",
-  "Menyiapkan profil pengguna...",
-  "Mengirim kode verifikasi...",
-  "Sedikit lagi selesai..."
-];
-const signInLoadingMessages = ["Mengalihkan ke halaman masuk..."];
 
 export default function SignUpClient() {
   const [name, setName] = useState("");
@@ -34,19 +87,15 @@ export default function SignUpClient() {
 
   const { signup, sendCode, loading: storeLoading } = useAuthStore();
   const router = useRouter();
-
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
-  const [activeMessages, setActiveMessages] = useState(signUpLoadingMessages);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim() || !username.trim() || !email.trim() || !password.trim()) {
-      toast.error("Mohon lengkapi semua data pendaftaran");
       return;
     }
 
-    setActiveMessages(signUpLoadingMessages);
     setIsLoadingLocal(true);
 
     try {
@@ -60,69 +109,98 @@ export default function SignUpClient() {
       
       setTimeout(() => {
         router.push(`/verify-code`);
+        setIsLoadingLocal(false);
       }, 2000);
 
     } catch (err: any) {
-      console.error("Signup/OTP error:", err);
+      console.error(err);
       setIsLoadingLocal(false);
     }
   };
 
   const handleSignInNavigation = (e: React.MouseEvent) => {
     e.preventDefault();
-    setActiveMessages(signInLoadingMessages);
     setIsLoadingLocal(true);
     setTimeout(() => {
-      router.push("/signin");
+      router.push("/sign-in");
     }, 1000);
   };
 
   const isGlobalLoading = storeLoading || isLoadingLocal;
 
   return (
-    <div className="relative min-h-screen bg-[#0A0F1C] text-slate-100 font-sans overflow-hidden flex items-center justify-center py-10">
+    <div className="relative min-h-screen bg-[#020617] text-slate-100 font-sans flex items-center justify-center py-10 overflow-hidden">
 
-      {/* Perbaikan: Menggunakan AnimatePresence dan conditional rendering karena GlobalLoader tidak menerima prop isLoading */}
-      <AnimatePresence>
-        {isGlobalLoading && <GlobalLoader messages={activeMessages} />}
-      </AnimatePresence>
-
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], x: [0, 50, 0], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen" 
-        />
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 mix-blend-overlay pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none"></div>
         
-        <motion.div 
-          animate={{ scale: [1, 1.3, 1], x: [0, -50, 0], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-purple-600/15 rounded-full blur-[100px] mix-blend-screen" 
+        <motion.div
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"
+        />
+
+        <motion.div
+          animate={{
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/15 rounded-full blur-[120px] pointer-events-none"
+        />
+
+        <motion.div
+          animate={{
+            x: [0, 50, -50, 0],
+            y: [0, 50, 50, 0],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-[40%] left-[20%] w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none"
         />
       </div>
 
-      <NotificationStack />
+      <div className="fixed bottom-8 left-8 z-[50]">
+        <HoverBorderGradient
+            containerClassName="rounded-full"
+            as="button"
+            onClick={() => router.push('/')}
+            className="text-white"
+        >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">Kembali</span>
+        </HoverBorderGradient>
+      </div>
 
       <div className="w-full max-w-2xl px-6 relative z-10">
-
-        <button 
-          onClick={() => router.push('/')}
-          className="absolute -top-12 left-6 text-slate-400 hover:text-white flex items-center gap-2 transition-colors group text-sm font-medium"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Kembali ke Beranda
-        </button>
-
         <GlassCard className="p-8 md:p-12 rounded-[2rem]">
           
           <div className="mb-10 flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 shadow-lg shadow-blue-500/20 flex items-center justify-center mb-6 p-4 hover:scale-105 transition-transform duration-300">
-              <img src="/lisan.png" alt="Lisan Logo" className="w-full h-full object-contain" />
+            <div className="relative w-24 h-24 flex items-center justify-center mb-6">
+                <img src="/lisan.png" alt="Lisan Logo" className="w-full h-full object-contain drop-shadow-xl" />
             </div>
 
-            <h1 className="text-3xl font-bold text-white mb-2">Buat Akun Baru</h1>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Buat Akun Baru</h1>
             <p className="text-slate-400 text-sm max-w-md">
-              Bergabunglah dengan <span className="font-semibold text-blue-400">Lisan</span> untuk mulai belajar bahasa isyarat.
+              Bergabunglah dengan <span className="font-semibold text-blue-400">Lisan</span> untuk mulai belajar bahasa isyarat dengan teknologi AI.
             </p>
           </div>
 
@@ -198,9 +276,10 @@ export default function SignUpClient() {
               <button
                 type="submit"
                 disabled={isGlobalLoading}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden group"
               >
-                {isGlobalLoading ? "Memproses..." : "Daftar Sekarang"}
+                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12"></div>
+                <span className="relative z-10">{isGlobalLoading ? "Memproses..." : "Daftar Sekarang"}</span>
               </button>
 
               <p className="text-center text-sm text-slate-400 mt-6">
