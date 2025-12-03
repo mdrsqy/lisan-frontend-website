@@ -299,7 +299,6 @@ export default function AdminAnnouncementManagementClient() {
         ))}
       </div>
 
-      {/* CTA Banner */}
       <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-[2rem] p-8 text-white shadow-2xl group border border-slate-700/50">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] group-hover:bg-indigo-500/30 transition-colors"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[80px] group-hover:bg-purple-500/30 transition-colors"></div>
@@ -511,7 +510,6 @@ export default function AdminAnnouncementManagementClient() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-500/30 overflow-hidden relative">
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-         {/* Colorful Mesh Gradient Background */}
          <motion.div 
            animate={{ x: [0, 100, 0], y: [0, -50, 0], scale: [1, 1.2, 1] }}
            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -526,11 +524,6 @@ export default function AdminAnnouncementManagementClient() {
            animate={{ x: [0, 50, 0], y: [0, 50, 0], scale: [1, 1.5, 1] }}
            transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
            className="absolute -bottom-40 left-1/2 w-[600px] h-[600px] bg-cyan-300/30 rounded-full mix-blend-multiply filter blur-[128px]"
-         />
-         <motion.div 
-           animate={{ x: [0, -50, 0], y: [0, -100, 0], scale: [1, 1.2, 1] }}
-           transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-           className="absolute top-1/2 left-10 w-[400px] h-[400px] bg-rose-300/30 rounded-full mix-blend-multiply filter blur-[128px]"
          />
       </div>
 
@@ -687,7 +680,7 @@ export default function AdminAnnouncementManagementClient() {
                                         </>
                                     ) : (
                                         <div className="text-center p-2">
-                                            <div className="mx-auto w-10 h-10 text-slate-300 mb-2"><LayoutGrid /></div>
+                                            <LayoutGrid className="mx-auto w-10 h-10 text-slate-300 mb-2" />
                                             <span className="text-xs font-semibold text-slate-400">Upload</span>
                                         </div>
                                     )}

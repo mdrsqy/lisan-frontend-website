@@ -1,5 +1,7 @@
+"use client";
+
 import { create } from "zustand";
-import api from "./api";
+import api from "@/lib/api";
 
 export interface User {
   id: string;
@@ -8,12 +10,12 @@ export interface User {
   email: string;
   role: string;
   is_verified: boolean;
-  is_premium?: boolean;
+  is_premium: boolean;
   avatar_url?: string;
   created_at: string;
 }
 
-interface UserStats {
+export interface UserStats {
   users: number;
   admins: number;
   premium: number;
@@ -25,19 +27,33 @@ interface UsersState {
   stats: UserStats | null;
   currentUser: User | null;
   isLoading: boolean;
-  error: string | null;
+  
+  // Pagination & Filters State
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
+  };
+  search: string;
+  filters: {
+    role: string;
+    verified: string; // "true", "false", or ""
+    premium: string;  // "true", "false", or ""
+  };
 
-  page: number;
-  limit: number;
+  // Actions
+  setSearch: (query: string) => void;
+  setFilter: (key: keyof UsersState["filters"], value: string) => void;
+  setPage: (page: number) => void;
 
-  fetchUsers: (params?: { page?: number; limit?: number }) => Promise<void>;
-  searchUsers: (query: string) => Promise<void>;
-  filterUsers: (filters: { role?: string; premium?: boolean; verified?: boolean }) => Promise<void>;
+  fetchUsers: () => Promise<void>;
   fetchStats: () => Promise<void>;
   fetchUserDetail: (id: string) => Promise<void>;
-
-  setUserPremium: (id: string, status: boolean) => Promise<void>;
-  setUserVerified: (id: string) => Promise<void>;
+  
+  togglePremium: (id: string, status: boolean) => Promise<void>;
+  toggleVerified: (id: string, status: boolean) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
 }
 
 export const useUsersStore = create<UsersState>((set, get) => ({
@@ -45,110 +61,124 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   stats: null,
   currentUser: null,
   isLoading: false,
-  error: null,
-  page: 1,
-  limit: 10,
-
-  fetchUsers: async (params) => {
-    const page = params?.page || get().page;
-    const limit = params?.limit || get().limit;
-
-    set({ isLoading: true, error: null });
-    try {
-      const { data } = await api.get(`/api/users/paginate?page=${page}&limit=${limit}`);
-      set({ users: data, page, limit });
-    } catch (error: any) {
-      console.error("Fetch users failed", error);
-      set({ error: error.message });
-    } finally {
-      set({ isLoading: false });
-    }
+  
+  pagination: {
+    page: 1,
+    limit: 10,
+    total: 0,
+    total_pages: 1,
+  },
+  search: "",
+  filters: {
+    role: "",
+    verified: "",
+    premium: "",
   },
 
-  searchUsers: async (query) => {
-    if (!query) {
-      return get().fetchUsers();
-    }
+  setSearch: (search) => set({ search }),
+  
+  setFilter: (key, value) => set((state) => ({
+    filters: { ...state.filters, [key]: value },
+    pagination: { ...state.pagination, page: 1 } // Reset ke page 1 saat filter berubah
+  })),
 
-    set({ isLoading: true, error: null });
-    try {
-      const { data } = await api.get(`/api/users/search?q=${query}`);
-      set({ users: data });
-    } catch (error: any) {
-      console.error("Search failed", error);
-      set({ error: error.message });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+  setPage: (page) => set((state) => ({
+    pagination: { ...state.pagination, page }
+  })),
 
-  filterUsers: async ({ role, premium, verified }) => {
-    set({ isLoading: true, error: null });
+  fetchUsers: async () => {
+    const { pagination, search, filters } = get();
+    set({ isLoading: true });
+
     try {
       const params = new URLSearchParams();
-      if (role) params.append("role", role);
-      if (premium !== undefined) params.append("premium", String(premium));
-      if (verified !== undefined) params.append("verified", String(verified));
+      params.append("page", pagination.page.toString());
+      params.append("limit", pagination.limit.toString());
+      if (search) params.append("q", search);
+      if (filters.role) params.append("role", filters.role);
+      if (filters.verified) params.append("verified", filters.verified);
+      if (filters.premium) params.append("premium", filters.premium);
 
-      const { data } = await api.get(`/api/users/filter?${params.toString()}`);
-      set({ users: data });
-    } catch (error: any) {
-      console.error("Filter failed", error);
-      set({ error: error.message });
-    } finally {
+      const res = await api.get(`/api/users/list?${params.toString()}`);
+
+      set({
+        users: res.data.data,
+        pagination: res.data.pagination,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
       set({ isLoading: false });
     }
   },
 
   fetchStats: async () => {
     try {
-      const { data } = await api.get("/api/users/count");
-      set({ stats: data });
+      const res = await api.get("/api/users/count");
+      set({ stats: res.data });
     } catch (error) {
-      console.error("Failed fetch stats", error);
+      console.error("Failed to fetch user stats:", error);
     }
   },
 
-  fetchUserDetail: async (id) => {
-    set({ isLoading: true, currentUser: null, error: null });
+  fetchUserDetail: async (id: string) => {
+    set({ isLoading: true, currentUser: null });
     try {
-      const { data } = await api.get(`/api/users/${id}`);
-      set({ currentUser: data });
-    } catch (error: any) {
-      console.error("Fetch user detail failed", error);
-      set({ error: error.message });
-    } finally {
+      const res = await api.get(`/api/users/detail/${id}`);
+      set({ currentUser: res.data.data, isLoading: false });
+    } catch (error) {
+      console.error("Failed to fetch user detail:", error);
       set({ isLoading: false });
     }
   },
 
-  setUserPremium: async (id, status) => {
+  togglePremium: async (id: string, status: boolean) => {
     try {
-      await api.put(`/api/users/${id}/premium`, { status });
+      await api.patch(`/api/users/${id}/premium`, { is_premium: status });
+      
+      // Optimistic Update
       set((state) => ({
         users: state.users.map((u) => 
           u.id === id ? { ...u, is_premium: status } : u
         ),
-        currentUser: state.currentUser?.id === id ? { ...state.currentUser, is_premium: status } : state.currentUser
+        currentUser: state.currentUser?.id === id 
+          ? { ...state.currentUser, is_premium: status } 
+          : state.currentUser
       }));
-    } catch (error: any) {
-      console.error("Set premium failed", error);
-      throw error;
+      
+      // Refresh stats karena jumlah premium berubah
+      get().fetchStats();
+    } catch (error) {
+      console.error("Failed to toggle premium:", error);
     }
   },
 
-  setUserVerified: async (id) => {
+  toggleVerified: async (id: string, status: boolean) => {
     try {
-      await api.put(`/api/users/${id}/verified`);
+      await api.patch(`/api/users/${id}/verified`, { is_verified: status });
+      
       set((state) => ({
         users: state.users.map((u) => 
-          u.id === id ? { ...u, is_verified: true } : u
+          u.id === id ? { ...u, is_verified: status } : u
         ),
-        currentUser: state.currentUser?.id === id ? { ...state.currentUser, is_verified: true } : state.currentUser
+        currentUser: state.currentUser?.id === id 
+          ? { ...state.currentUser, is_verified: status } 
+          : state.currentUser
       }));
-    } catch (error: any) {
-      console.error("Set verified failed", error);
-      throw error;
+
+      get().fetchStats();
+    } catch (error) {
+      console.error("Failed to toggle verified:", error);
+    }
+  },
+
+  deleteUser: async (id: string) => {
+    try {
+      await api.delete(`/api/users/${id}`);
+      get().fetchUsers();
+      get().fetchStats();
+    } catch (error) {
+      console.error("Failed to delete user:", error);
     }
   }
 }));

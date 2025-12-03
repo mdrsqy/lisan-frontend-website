@@ -2,7 +2,7 @@ import AdminAnnouncementManagementClient from "./AdminAnnouncemenetManagementCli
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Manajemen Pengumuman - Lisan Admin",
+  title: "Pengelolaan Pengumuman",
   description: "Pusat kontrol untuk mengelola pengumuman, berita, dan informasi aplikasi Lisan.",
 };
 
