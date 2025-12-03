@@ -58,7 +58,6 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   if (!mounted) return null;
 
-  // Hapus badge dari menu item
   const mainMenu: MenuItem[] = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Users Management", href: "/admin/user-management", icon: Users },
@@ -145,7 +144,7 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                           {item.name}
                         </span>
 
-                        {/* Chevron Indicator hanya untuk tab aktif dan tanpa badge */}
+                        {/* Chevron Indicator hanya untuk tab aktif */}
                         {isActive && (
                           <motion.div
                             initial={{ opacity: 0, x: -10 }}

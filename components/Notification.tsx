@@ -11,6 +11,14 @@ interface NotificationState {
   message: string;
 }
 
+// --- Helper Function untuk memanggil notifikasi dari component lain ---
+export const notify = (type: NotificationType, message: string) => {
+  if (typeof window !== "undefined") {
+    const event = new CustomEvent("notify", { detail: { type, message } });
+    window.dispatchEvent(event);
+  }
+};
+
 export default function Notification() {
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
