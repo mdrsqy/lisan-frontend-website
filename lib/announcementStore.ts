@@ -8,6 +8,7 @@ export interface Announcement {
   title: string;
   content: string;
   image_url: string | null;
+  video_url: string | null; // << Baru
   category: string;
   is_pinned: boolean;
   is_active: boolean;
@@ -25,6 +26,7 @@ export interface AnnouncementFormData {
   category: string;
   is_pinned: boolean;
   publish_at: string;
+  video_url: string; // << Baru
   image: File | null;
 }
 
@@ -157,6 +159,8 @@ export const useAnnouncementStore = create<AnnouncementStore>((set, get) => ({
     fd.append("category", form.category);
     fd.append("publish_at", form.publish_at);
     fd.append("is_pinned", String(form.is_pinned));
+    
+    if (form.video_url) fd.append("video_url", form.video_url);
     if (form.image) fd.append("image", form.image);
 
     const res = await api.post("/api/announcements/create", fd, {
@@ -175,6 +179,9 @@ export const useAnnouncementStore = create<AnnouncementStore>((set, get) => ({
     fd.append("category", form.category);
     fd.append("publish_at", form.publish_at);
     fd.append("is_pinned", String(form.is_pinned));
+    
+    // Update: Kirim video_url jika ada (atau string kosong untuk menghapus)
+    if (form.video_url !== undefined) fd.append("video_url", form.video_url);
     if (form.image) fd.append("image", form.image);
 
     const res = await api.put(`/api/announcements/update/${id}`, fd, {

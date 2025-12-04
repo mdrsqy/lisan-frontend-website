@@ -5,10 +5,9 @@ import {
   LayoutDashboard,
   Users,
   Megaphone,
-  Trophy,
+  Gamepad2,
+  BookOpen,
   Bell,
-  BarChart2,
-  Settings2,
   ShieldAlert,
   HelpCircle,
   LogOut,
@@ -16,18 +15,18 @@ import {
   Settings,
   MoreHorizontal,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  CreditCard
 } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "../lib/authStore";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Interface diperbarui dengan colorClass untuk tema Rainbow
 interface MenuItem {
   name: string;
   href: string;
   icon: any;
-  colorClass: string; // Class warna background solid (misal: bg-blue-500)
+  colorClass: string;
 }
 
 interface MenuSection {
@@ -44,14 +43,13 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   useEffect(() => {
     setMounted(true);
-    // Sinkronisasi user dari localStorage saat mount
     if (!user) {
       const savedUser = localStorage.getItem("user");
       if (savedUser) {
         try {
           setUser(JSON.parse(savedUser));
         } catch (e) {
-          console.error("Gagal parsing user data", e);
+          console.error(e);
         }
       }
     } else {
@@ -59,7 +57,6 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
     }
   }, [user, setUser]);
 
-  // Handle klik di luar profile menu untuk menutupnya
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -72,39 +69,33 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   if (!mounted) return null;
 
-  // Konfigurasi Menu dengan Warna-warni (Rainbow Theme)
   const menuGroups: MenuSection[] = [
     {
       items: [
-        { name: "Dasbor", href: "/admin/dashboard", icon: LayoutDashboard, colorClass: "bg-sky-500" }
+        { name: "Dasbor", href: "/admin/dashboard", icon: LayoutDashboard, colorClass: "bg-gradient-to-r from-sky-500 to-blue-500" }
       ]
     },
     {
       title: "Pengelolaan",
       items: [
-        { name: "Pengguna", href: "/admin/user-management", icon: Users, colorClass: "bg-blue-500" },
-        { name: "Pengumuman", href: "/admin/announcement-management", icon: Megaphone, colorClass: "bg-emerald-500" },
-        { name: "Pencapaian", href: "/admin/achievement-management", icon: Trophy, colorClass: "bg-amber-500" },
-        { name: "Notifikasi", href: "/admin/notifications", icon: Bell, colorClass: "bg-rose-500" },
+        { name: "Pengguna", href: "/admin/user-management", icon: Users, colorClass: "bg-gradient-to-r from-blue-500 to-indigo-500" },
+        { name: "Pengumuman", href: "/admin/announcement-management", icon: Megaphone, colorClass: "bg-gradient-to-r from-emerald-400 to-teal-500" },
+        { name: "Modul Belajar", href: "/admin/learning-management", icon: BookOpen, colorClass: "bg-gradient-to-r from-pink-500 to-rose-500" },
+        { name: "Gamifikasi", href: "/admin/gamification-management", icon: Gamepad2, colorClass: "bg-gradient-to-r from-amber-400 to-orange-500" },
       ]
     },
     {
-      title: "Laporan",
+      title: "Laporan & Sistem",
       items: [
-        { name: "Laporan & Analitik", href: "/admin/analytics", icon: BarChart2, colorClass: "bg-violet-500" }
-      ]
-    },
-    {
-      title: "Sistem",
-      items: [
-        { name: "Pengaturan Sistem", href: "/admin/system-settings", icon: Settings2, colorClass: "bg-slate-500" }
+        { name: "Pembayaran", href: "/admin/payment-management", icon: CreditCard, colorClass: "bg-gradient-to-r from-violet-500 to-purple-500" },
+        { name: "Notifikasi", href: "/admin/notifications", icon: Bell, colorClass: "bg-gradient-to-r from-rose-500 to-red-500" },
       ]
     },
     {
       title: "Keamanan & Support",
       items: [
-        { name: "Log Aktivitas", href: "/admin/activity-logs", icon: ShieldAlert, colorClass: "bg-orange-500" },
-        { name: "FAQ & Masukkan", href: "/admin/support", icon: HelpCircle, colorClass: "bg-teal-500" }
+        { name: "Log Aktivitas", href: "/admin/activity-logs", icon: ShieldAlert, colorClass: "bg-gradient-to-r from-orange-500 to-red-500" },
+        { name: "FAQ & Masukkan", href: "/admin/support-management", icon: HelpCircle, colorClass: "bg-gradient-to-r from-teal-400 to-cyan-500" }
       ]
     }
   ];
@@ -117,26 +108,19 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
   return (
     <>
-      <motion.aside 
-        initial={{ x: -300, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed left-0 top-0 h-screen w-80 z-50 flex flex-col justify-between border-r border-white/60 bg-white/80 backdrop-blur-[40px] shadow-[0_0_40px_-15px_rgba(0,0,0,0.05)]"
-      >
-        {/* Background Blobs (Soft Rainbow) */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
-            <div className="absolute -top-[10%] -left-[10%] w-[300px] h-[300px] bg-sky-200 rounded-full blur-[100px]" />
-            <div className="absolute top-[40%] -right-[20%] w-[250px] h-[250px] bg-fuchsia-200 rounded-full blur-[100px]" />
-            <div className="absolute -bottom-[10%] left-[20%] w-[300px] h-[300px] bg-violet-200 rounded-full blur-[100px]" />
+      <aside className="fixed left-0 top-0 h-screen w-80 z-50 flex flex-col justify-between border-r border-white/40 bg-white/70 backdrop-blur-2xl shadow-[0_0_50px_-15px_rgba(0,0,0,0.1)]">
+        
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-50">
+            <div className="absolute -top-[10%] -left-[20%] w-[500px] h-[500px] bg-indigo-200/50 rounded-full blur-[100px]" />
+            <div className="absolute top-[30%] -right-[20%] w-[400px] h-[400px] bg-fuchsia-200/50 rounded-full blur-[100px]" />
+            <div className="absolute -bottom-[10%] left-[10%] w-[400px] h-[400px] bg-cyan-200/50 rounded-full blur-[100px]" />
         </div>
 
         <div className="relative z-10 flex flex-col h-full">
-          {/* Header / Logo */}
           <div className="px-8 pt-8 pb-6 flex-shrink-0">
             <Link href="/admin/dashboard" className="group flex items-center gap-4">
-              <div className="relative w-12 h-12 flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300">
+              <div className="relative w-12 h-12 flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
                 <div className="absolute inset-0 bg-white/20 rounded-2xl backdrop-blur-sm" />
-                {/* Ganti src logo sesuai asset Anda */}
                 <img 
                   src="/lisan.png" 
                   alt="Lisan Logo" 
@@ -153,14 +137,13 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
                   <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">
-                    Online
+                    System Online
                   </p>
                 </div>
               </div>
             </Link>
           </div>
 
-          {/* Menu Items */}
           <div className="flex-1 px-5 py-2 overflow-y-auto custom-scrollbar space-y-6">
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
@@ -177,42 +160,31 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
 
                     return (
                       <Link key={item.name} href={item.href}>
-                        <div className="relative group flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 overflow-hidden">
-                          
-                          {/* Active Background (Solid Color with Animation) */}
-                          {isActive && (
-                            <motion.div
-                              layoutId="active-nav-pill"
-                              className={`absolute inset-0 ${item.colorClass} shadow-md`}
-                              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            />
-                          )}
-
-                          {/* Icon Container */}
+                        <div 
+                            className={`relative group flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-200 overflow-hidden ${
+                                isActive 
+                                ? `${item.colorClass} shadow-lg shadow-indigo-500/20` 
+                                : "hover:bg-white hover:shadow-sm"
+                            }`}
+                        >
                           <div className={`relative z-10 p-1.5 rounded-lg transition-all duration-300 ${
                             isActive 
                               ? "bg-white/20 text-white" 
-                              : `bg-white/50 text-slate-500 group-hover:bg-white/80 group-hover:text-slate-800 group-hover:shadow-sm`
+                              : `bg-white/50 text-slate-500 group-hover:bg-white group-hover:text-indigo-600 group-hover:shadow-sm`
                           }`}>
                             <Icon className="w-5 h-5" />
                           </div>
 
-                          {/* Text */}
                           <span className={`relative z-10 text-sm font-semibold transition-colors duration-200 ${
                             isActive ? "text-white tracking-wide" : "text-slate-600 group-hover:text-slate-900"
                           }`}>
                             {item.name}
                           </span>
 
-                          {/* Chevron Arrow */}
                           {isActive && (
-                            <motion.div
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              className="relative z-10 ml-auto"
-                            >
+                            <div className="relative z-10 ml-auto">
                               <ChevronRight className="w-4 h-4 text-white/90" />
-                            </motion.div>
+                            </div>
                           )}
                         </div>
                       </Link>
@@ -221,22 +193,21 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                 </nav>
               </div>
             ))}
-            <div className="h-24" /> {/* Spacer untuk bottom content */}
+            <div className="h-24" />
           </div>
 
-          {/* Profile Section (Fixed Bottom) */}
           <div className="absolute bottom-0 left-0 w-full p-5 bg-gradient-to-t from-white/95 via-white/80 to-transparent z-20 pointer-events-none flex flex-col justify-end h-32">
             <div ref={profileRef} className="relative pointer-events-auto">
               <div 
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className={`group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-xl ${
+                className={`group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 border backdrop-blur-md ${
                   showProfileMenu 
-                    ? "bg-white border-indigo-200 shadow-xl shadow-indigo-500/10 scale-[1.02]" 
-                    : "bg-white/60 border-white/60 hover:bg-white/90 hover:border-white/80 hover:shadow-lg hover:-translate-y-0.5"
+                    ? "bg-white border-indigo-200 shadow-2xl shadow-indigo-500/20 scale-[1.02]" 
+                    : "bg-white/60 border-white/50 hover:bg-white/90 hover:border-white/80 hover:shadow-lg hover:-translate-y-0.5"
                 }`}
               >
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-indigo-400 to-purple-500">
+                  <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr from-indigo-400 to-pink-500">
                     <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                       {user?.profile_picture ? (
                         <img src={user.profile_picture} alt="Profile" className="w-full h-full object-cover" />
@@ -259,20 +230,19 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
                   </p>
                 </div>
 
-                <motion.div animate={{ rotate: showProfileMenu ? 180 : 0 }}>
+                <div className={`transition-transform duration-300 ${showProfileMenu ? "rotate-180" : ""}`}>
                   <MoreHorizontal className="h-5 w-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
-                </motion.div>
+                </div>
               </div>
 
-              {/* Profile Popup Menu */}
               <AnimatePresence>
                 {showProfileMenu && (
                   <motion.div
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: -12, scale: 1 }}
-                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="absolute bottom-full left-0 w-full bg-white/95 backdrop-blur-3xl border border-white/60 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden z-50 p-2"
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute bottom-full left-0 w-full bg-white/90 backdrop-blur-2xl border border-white/60 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] overflow-hidden z-50 p-2 ring-1 ring-black/5"
                   >
                     <div className="space-y-1">
                       {profileMenu.map((item) => (
@@ -309,9 +279,8 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             </div>
           </div>
         </div>
-      </motion.aside>
+      </aside>
 
-      {/* Logout Confirmation Modal */}
       <AnimatePresence>
         {showLogoutModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -324,10 +293,10 @@ export function Sidebar({ activeTab }: { activeTab: string }) {
             />
             
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: "spring", stiffness: 350, damping: 25 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
               className="relative w-full max-w-sm bg-white/90 border border-white/60 rounded-[32px] p-8 shadow-2xl overflow-hidden backdrop-blur-2xl"
             >
               <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-400 via-orange-400 to-rose-400"></div>
